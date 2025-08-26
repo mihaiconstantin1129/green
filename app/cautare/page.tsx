@@ -1,25 +1,30 @@
-'use client'
-
-import { useState } from 'react'
 import ArticleCard from '@/components/ArticleCard'
-import { articles } from '@/data/mock'
+import { searchPosts } from '@/lib/wp'
 
-export default function SearchPage() {
-  const [query, setQuery] = useState('')
-  const results = articles.filter((a) =>
-    a.title.toLowerCase().includes(query.toLowerCase())
-  )
+interface Props {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export default async function SearchPage({ searchParams }: Props) {
+  const term = (searchParams?.q as string) || ''
+  const page = parseInt((searchParams?.pagina as string) || '1')
+  const results = term ? await searchPosts(term, { page, perPage: 10 }) : []
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">Căutare</h1>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Caută..."
-        className="border p-2 w-full mb-4"
-      />
+      <form className="mb-4">
+        <input
+          type="text"
+          name="q"
+          defaultValue={term}
+          placeholder="Caută..."
+          className="border p-2 w-full"
+        />
+      </form>
+      {term && results.length === 0 && (
+        <p className="text-gray-500">Nu am găsit articole.</p>
+      )}
       <div className="space-y-8">
         {results.map((a) => (
           <ArticleCard key={a.slug} article={a} />

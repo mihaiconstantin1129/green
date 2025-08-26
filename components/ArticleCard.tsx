@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Article } from '@/data/mock'
+import type { Post } from '@/lib/wp'
 
-export default function ArticleCard({ article }: { article: Article }) {
+export default function ArticleCard({ article }: { article: Post }) {
   return (
     <div className="space-y-2">
       <Link href={`/stiri/${article.slug}`}>

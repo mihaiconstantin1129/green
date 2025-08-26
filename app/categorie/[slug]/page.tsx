@@ -1,24 +1,31 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { categories, getArticlesByCategory } from '@/data/mock'
+import { getCategoryBySlug, fixtures } from '@/lib/wp'
 
 export function generateStaticParams() {
-  return categories.map((c) => ({ slug: c.slug }))
+  return fixtures.categories.map((c) => ({ slug: c.slug }))
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const items = getArticlesByCategory(params.slug)
-  const cat = categories.find((c) => c.slug === params.slug)
-  if (!cat) return <div>Categorie necunoscută.</div>
+interface Props {
+  params: { slug: string }
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export default async function CategoryPage({ params, searchParams }: Props) {
+  const page = parseInt((searchParams?.pagina as string) || '1')
+  const { category, posts } = await getCategoryBySlug(params.slug, { page, perPage: 10 })
+  if (!category) return <div>Categorie necunoscută.</div>
 
   return (
     <div>
-      <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: cat.name }]} />
-      <h1 className="text-3xl font-bold mb-6">{cat.name}</h1>
+      <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: category.name }]} />
+      <h1 className="text-3xl font-bold mb-6">{category.name}</h1>
       <div className="space-y-8">
-        {items.map((a) => (
-          <ArticleCard key={a.slug} article={a} />
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-gray-500">Nu există articole în această categorie.</p>
+        ) : (
+          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+        )}
       </div>
     </div>
   )
