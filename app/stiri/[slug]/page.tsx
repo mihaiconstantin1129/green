@@ -2,6 +2,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import ProseContent from '@/components/ProseContent'
 import ShareBar from '@/components/ShareBar'
 import AdsenseSlot from '@/components/AdsenseSlot'
+import SidebarPopular from '@/components/SidebarPopular'
 import { getPostBySlug, getPosts } from '@/lib/wp'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
@@ -41,12 +42,21 @@ export default async function ArticlePage({ params }: Props) {
   if (!article) return <div>Articolul nu a fost găsit.</div>
 
   return (
-    <article className="max-w-3xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
-      <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-      <ProseContent html={article.content} />
-      <ShareBar title={article.title} />
-      <AdsenseSlot />
+      <div className="lg:flex lg:gap-8">
+        <article className="flex-1">
+          <h1 className="mb-6 text-4xl font-extrabold leading-tight">
+            {article.title}
+          </h1>
+          <ProseContent html={article.content} />
+          <ShareBar title={article.title} />
+        </article>
+        <aside className="mt-8 lg:mt-0 lg:w-80 space-y-6">
+          <AdsenseSlot className="w-full min-h-[600px]" />
+          <SidebarPopular />
+        </aside>
+      </div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -55,7 +65,12 @@ export default async function ArticlePage({ params }: Props) {
             '@type': 'BreadcrumbList',
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Acasă', item: siteUrl },
-              { '@type': 'ListItem', position: 2, name: article.title, item: `${siteUrl}/stiri/${article.slug}` },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: article.title,
+                item: `${siteUrl}/stiri/${article.slug}`,
+              },
             ],
           }),
         }}
@@ -76,10 +91,13 @@ export default async function ArticlePage({ params }: Props) {
               name: 'Green News România',
               logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png` },
             },
-            mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/stiri/${article.slug}` },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `${siteUrl}/stiri/${article.slug}`,
+            },
           }),
         }}
       />
-    </article>
+    </div>
   )
 }
