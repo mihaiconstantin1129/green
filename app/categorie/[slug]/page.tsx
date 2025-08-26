@@ -1,6 +1,8 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getCategoryBySlug, fixtures } from '@/lib/wp'
+import type { Metadata } from 'next'
+import { siteUrl } from '@/lib/utils'
 
 export function generateStaticParams() {
   return fixtures.categories.map((c) => ({ slug: c.slug }))
@@ -9,6 +11,17 @@ export function generateStaticParams() {
 interface Props {
   params: { slug: string }
   searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { category } = await getCategoryBySlug(params.slug, { page: 1, perPage: 1 })
+  if (!category) return { title: 'Categorie' }
+  const url = `${siteUrl}/categorie/${category.slug}`
+  return {
+    title: category.name,
+    description: `Știri din categoria ${category.name}`,
+    alternates: { canonical: url },
+  }
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
@@ -27,6 +40,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           posts.map((a) => <ArticleCard key={a.slug} article={a} />)
         )}
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Acasă', item: siteUrl },
+              { '@type': 'ListItem', position: 2, name: category.name, item: `${siteUrl}/categorie/${category.slug}` },
+            ],
+          }),
+        }}
+      />
     </div>
   )
 }

@@ -11,6 +11,8 @@ export interface Post {
   excerpt: string
   content: string
   image: string
+  date: string
+  modified: string
   categories: Term[]
   tags: Term[]
   author: Author
@@ -39,6 +41,8 @@ function mapPost(node: any): Post {
     excerpt: node.excerpt,
     content: node.content,
     image: node.featuredImage?.node?.sourceUrl || '',
+    date: node.date || '',
+    modified: node.modified || '',
     categories: node.categories?.nodes?.map((c: any) => ({ slug: c.slug, name: c.name })) || [],
     tags: node.tags?.nodes?.map((t: any) => ({ slug: t.slug, name: t.name })) || [],
     author: {
@@ -49,7 +53,7 @@ function mapPost(node: any): Post {
 }
 
 export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
-  const query = `query Posts($offset: Int!, $size: Int!){\n    posts(where:{offsetPagination:{offset:$offset, size:$size}}){\n      nodes{\n        slug title excerpt content\n        categories{nodes{slug name}}\n        tags{nodes{slug name}}\n        author{node{slug name}}\n        featuredImage{node{sourceUrl}}\n      }\n    }\n  }`
+  const query = `query Posts($offset: Int!, $size: Int!){\n    posts(where:{offsetPagination:{offset:$offset, size:$size}}){\n      nodes{\n        slug title excerpt content date modified\n        categories{nodes{slug name}}\n        tags{nodes{slug name}}\n        author{node{slug name}}\n        featuredImage{node{sourceUrl}}\n      }\n    }\n  }`
   const variables = { offset: (page - 1) * perPage, size: perPage }
   try {
     const data = await fetchGraphQL<any>(query, variables)
@@ -60,7 +64,7 @@ export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perP
 }
 
 export async function getFeaturedPost(): Promise<Post | undefined> {
-  const query = `query Featured{\n    posts(where:{sticky:true}, first:1){nodes{slug title excerpt content categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n  }`
+  const query = `query Featured{\n    posts(where:{sticky:true}, first:1){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n  }`
   try {
     const data = await fetchGraphQL<any>(query, {})
     const node = data.posts.nodes[0]
@@ -71,7 +75,7 @@ export async function getFeaturedPost(): Promise<Post | undefined> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  const query = `query PostBySlug($slug: ID!){\n    post(id:$slug, idType:SLUG){\n      slug title excerpt content\n      categories{nodes{slug name}}\n      tags{nodes{slug name}}\n      author{node{slug name}}\n      featuredImage{node{sourceUrl}}\n    }\n  }`
+  const query = `query PostBySlug($slug: ID!){\n    post(id:$slug, idType:SLUG){\n      slug title excerpt content date modified\n      categories{nodes{slug name}}\n      tags{nodes{slug name}}\n      author{node{slug name}}\n      featuredImage{node{sourceUrl}}\n    }\n  }`
   try {
     const data = await fetchGraphQL<any>(query, { slug })
     return data.post ? mapPost(data.post) : undefined
@@ -81,7 +85,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
 }
 
 export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
-  const query = `query Category($slug: ID!, $offset: Int!, $size: Int!){\n    category(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n    }\n  }`
+  const query = `query Category($slug: ID!, $offset: Int!, $size: Int!){\n    category(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n    }\n  }`
   const variables = { slug, offset: (page - 1) * perPage, size: perPage }
   try {
     const data = await fetchGraphQL<any>(query, variables)
@@ -100,7 +104,7 @@ export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }
 }
 
 export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
-  const query = `query Tag($slug: ID!, $offset: Int!, $size: Int!){\n    tag(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n    }\n  }`
+  const query = `query Tag($slug: ID!, $offset: Int!, $size: Int!){\n    tag(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n    }\n  }`
   const variables = { slug, offset: (page - 1) * perPage, size: perPage }
   try {
     const data = await fetchGraphQL<any>(query, variables)
@@ -119,7 +123,7 @@ export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { p
 }
 
 export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
-  const query = `query Author($slug: ID!, $offset: Int!, $size: Int!){\n    user(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content categories{nodes{slug name}} tags{nodes{slug name}} featuredImage{node{sourceUrl}} author{node{slug name}}}}\n    }\n  }`
+  const query = `query Author($slug: ID!, $offset: Int!, $size: Int!){\n    user(id:$slug, idType:SLUG){\n      slug name\n      posts(where:{offsetPagination:{offset:$offset, size:$size}}){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} featuredImage{node{sourceUrl}} author{node{slug name}}}}\n    }\n  }`
   const variables = { slug, offset: (page - 1) * perPage, size: perPage }
   try {
     const data = await fetchGraphQL<any>(query, variables)
@@ -138,7 +142,7 @@ export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: 
 }
 
 export async function searchPosts(term: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
-  const query = `query Search($term: String!, $offset: Int!, $size: Int!){\n    posts(where:{search:$term, offsetPagination:{offset:$offset, size:$size}}){\n      nodes{slug title excerpt content categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}\n    }\n  }`
+  const query = `query Search($term: String!, $offset: Int!, $size: Int!){\n    posts(where:{search:$term, offsetPagination:{offset:$offset, size:$size}}){\n      nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}\n    }\n  }`
   const variables = { term, offset: (page - 1) * perPage, size: perPage }
   try {
     const data = await fetchGraphQL<any>(query, variables)

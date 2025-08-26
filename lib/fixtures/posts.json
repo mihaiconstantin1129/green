@@ -7,7 +7,9 @@
     "categories": [{ "slug": "general", "name": "General" }],
     "tags": [{ "slug": "actualitate", "name": "Actualitate" }],
     "author": { "slug": "ion-pop", "name": "Ion Pop" },
-    "image": "https://images.unsplash.com/photo-1522199710521-72d69614c702"
+    "image": "https://images.unsplash.com/photo-1522199710521-72d69614c702",
+    "date": "2025-05-27T08:00:00Z",
+    "modified": "2025-05-27T08:00:00Z"
   },
   {
     "slug": "a-doua-stire",
@@ -17,6 +19,8 @@
     "categories": [{ "slug": "tehnologie", "name": "Tehnologie" }],
     "tags": [{ "slug": "tech", "name": "Tech" }],
     "author": { "slug": "maria-ionescu", "name": "Maria Ionescu" },
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
+    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
+    "date": "2025-05-28T09:00:00Z",
+    "modified": "2025-05-28T09:00:00Z"
   }
 ]
