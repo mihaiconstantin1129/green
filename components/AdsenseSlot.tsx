@@ -1,12 +1,12 @@
 import React from 'react'
 
 interface Props {
-  client?: string
-  slot?: string
   className?: string
 }
 
-export default function AdsenseSlot({ client, slot, className }: Props) {
+export default function AdsenseSlot({ className }: Props) {
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID
+
   if (!client) {
     return (
       <div className="bg-gray-100 text-center text-sm text-gray-600 p-4 my-4">
@@ -17,13 +17,8 @@ export default function AdsenseSlot({ client, slot, className }: Props) {
 
   return (
     <div className={className}>
-      {/* Inserare script Google AdSense aici */}
-      <ins
-        className="adsbygoogle block"
-        style={{ display: 'block' }}
-        data-ad-client={client}
-        data-ad-slot={slot}
-      />
+      {/* Aici se inserează tagul <script> oficial AdSense */}
+      {/* Aici se inserează tagul <ins> oficial AdSense */}
     </div>
   )
 }

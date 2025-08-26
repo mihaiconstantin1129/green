@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
+import AdsenseSlot from '@/components/AdsenseSlot'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -41,8 +42,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="min-h-screen flex flex-col">
-        <header className="border-b">
-          <div className="container mx-auto flex items-center justify-between py-4 px-4">
+        <header className="sticky top-0 z-50 border-b bg-white">
+          <AdsenseSlot className="w-full min-h-[90px] border-b" />
+          <div className="container mx-auto flex items-center justify-between px-4 py-4">
             <Link href="/" className="text-2xl font-bold">
               Green News România
             </Link>
@@ -59,9 +61,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
         </header>
-        <main className="flex-1 container mx-auto px-4 py-6">{children}</main>
-        <footer className="border-t py-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Green News România. Toate drepturile rezervate.
+        <main className="container mx-auto flex-1 px-4 py-8">{children}</main>
+        <footer className="border-t">
+          <AdsenseSlot className="w-full min-h-[90px]" />
+          <div className="py-6 text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} Green News România. Toate drepturile rezervate.
+          </div>
         </footer>
       </body>
     </html>
