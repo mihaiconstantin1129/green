@@ -1,6 +1,6 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { getAuthorBySlug, fixtures } from '@/lib/wp'
+import { getAuthorBySlug, fixtures, type Post } from '@/lib/wp'
 
 export function generateStaticParams() {
   return fixtures.authors.map((a) => ({ slug: a.slug }))
@@ -24,7 +24,7 @@ export default async function AuthorPage({ params, searchParams }: Props) {
         {posts.length === 0 ? (
           <p className="text-gray-500">Nu există articole scrise de acest autor.</p>
         ) : (
-          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+          posts.map((a: Post) => <ArticleCard key={a.slug} article={a} />)
         )}
       </div>
     </div>
