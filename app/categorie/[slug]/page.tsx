@@ -1,6 +1,6 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { getCategoryBySlug, fixtures } from '@/lib/wp'
+import { getCategoryBySlug, fixtures, type Post } from '@/lib/wp'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
 
@@ -37,7 +37,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {posts.length === 0 ? (
           <p className="text-gray-500">Nu există articole în această categorie.</p>
         ) : (
-          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+          posts.map((a: Post) => <ArticleCard key={a.slug} article={a} />)
         )}
       </div>
       <script

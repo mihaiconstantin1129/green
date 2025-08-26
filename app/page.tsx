@@ -7,6 +7,8 @@ interface Props {
   searchParams?: { [key: string]: string | string[] | undefined }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage({ searchParams }: Props) {
   const page = parseInt((searchParams?.pagina as string) || '1')
   const articles = await getPosts({ page, perPage: 10 })

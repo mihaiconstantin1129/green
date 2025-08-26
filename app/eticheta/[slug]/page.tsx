@@ -1,6 +1,6 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { getTagBySlug, fixtures } from '@/lib/wp'
+import { getTagBySlug, fixtures, type Post } from '@/lib/wp'
 
 export function generateStaticParams() {
   return fixtures.tags.map((t) => ({ slug: t.slug }))
@@ -24,7 +24,7 @@ export default async function TagPage({ params, searchParams }: Props) {
         {posts.length === 0 ? (
           <p className="text-gray-500">Nu există articole pentru această etichetă.</p>
         ) : (
-          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+          posts.map((a: Post) => <ArticleCard key={a.slug} article={a} />)
         )}
       </div>
     </div>
