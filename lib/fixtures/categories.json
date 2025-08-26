@@ -1,4 +1,9 @@
 [
   { "slug": "general", "name": "General" },
-  { "slug": "tehnologie", "name": "Tehnologie" }
+  { "slug": "tehnologie", "name": "Tehnologie" },
+  { "slug": "mediu", "name": "Mediu" },
+  { "slug": "energie-verde", "name": "Energie Verde" },
+  { "slug": "inovatie", "name": "Inovație" },
+  { "slug": "politici-economie", "name": "Politici & Economie" },
+  { "slug": "lifestyle-sustenabil", "name": "Lifestyle Sustenabil" }
 ]
