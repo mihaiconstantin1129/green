@@ -1,14 +1,19 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { tags, getArticlesByTag } from '@/data/mock'
+import { getTagBySlug, fixtures } from '@/lib/wp'
 
 export function generateStaticParams() {
-  return tags.map((t) => ({ slug: t.slug }))
+  return fixtures.tags.map((t) => ({ slug: t.slug }))
 }
 
-export default function TagPage({ params }: { params: { slug: string } }) {
-  const items = getArticlesByTag(params.slug)
-  const tag = tags.find((t) => t.slug === params.slug)
+interface Props {
+  params: { slug: string }
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export default async function TagPage({ params, searchParams }: Props) {
+  const page = parseInt((searchParams?.pagina as string) || '1')
+  const { tag, posts } = await getTagBySlug(params.slug, { page, perPage: 10 })
   if (!tag) return <div>Eticheta nu există.</div>
 
   return (
@@ -16,9 +21,11 @@ export default function TagPage({ params }: { params: { slug: string } }) {
       <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Etichetă: ${tag.name}` }]} />
       <h1 className="text-3xl font-bold mb-6">Etichetă: {tag.name}</h1>
       <div className="space-y-8">
-        {items.map((a) => (
-          <ArticleCard key={a.slug} article={a} />
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-gray-500">Nu există articole pentru această etichetă.</p>
+        ) : (
+          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+        )}
       </div>
     </div>
   )

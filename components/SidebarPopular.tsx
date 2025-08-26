@@ -1,20 +1,24 @@
 import Link from 'next/link'
-import { getPopular } from '@/data/mock'
+import { getPosts } from '@/lib/wp'
 
-export default function SidebarPopular() {
-  const popular = getPopular()
+export default async function SidebarPopular() {
+  const popular = await getPosts({ page: 1, perPage: 3 })
   return (
     <aside className="space-y-2">
       <h3 className="font-semibold">Populare</h3>
-      <ul className="space-y-1">
-        {popular.map((article) => (
-          <li key={article.slug}>
-            <Link href={`/stiri/${article.slug}`} className="hover:underline">
-              {article.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {popular.length === 0 ? (
+        <p className="text-sm text-gray-500">Nu există articole populare.</p>
+      ) : (
+        <ul className="space-y-1">
+          {popular.map((article) => (
+            <li key={article.slug}>
+              <Link href={`/stiri/${article.slug}`} className="hover:underline">
+                {article.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </aside>
   )
 }

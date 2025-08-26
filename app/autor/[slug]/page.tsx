@@ -1,14 +1,19 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { authors, getArticlesByAuthor } from '@/data/mock'
+import { getAuthorBySlug, fixtures } from '@/lib/wp'
 
 export function generateStaticParams() {
-  return authors.map((a) => ({ slug: a.slug }))
+  return fixtures.authors.map((a) => ({ slug: a.slug }))
 }
 
-export default function AuthorPage({ params }: { params: { slug: string } }) {
-  const items = getArticlesByAuthor(params.slug)
-  const author = authors.find((a) => a.slug === params.slug)
+interface Props {
+  params: { slug: string }
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export default async function AuthorPage({ params, searchParams }: Props) {
+  const page = parseInt((searchParams?.pagina as string) || '1')
+  const { author, posts } = await getAuthorBySlug(params.slug, { page, perPage: 10 })
   if (!author) return <div>Autor necunoscut.</div>
 
   return (
@@ -16,9 +21,11 @@ export default function AuthorPage({ params }: { params: { slug: string } }) {
       <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Autor: ${author.name}` }]} />
       <h1 className="text-3xl font-bold mb-6">Autor: {author.name}</h1>
       <div className="space-y-8">
-        {items.map((a) => (
-          <ArticleCard key={a.slug} article={a} />
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-gray-500">Nu există articole scrise de acest autor.</p>
+        ) : (
+          posts.map((a) => <ArticleCard key={a.slug} article={a} />)
+        )}
       </div>
     </div>
   )

@@ -2,18 +2,19 @@ import Breadcrumb from '@/components/Breadcrumb'
 import ProseContent from '@/components/ProseContent'
 import ShareBar from '@/components/ShareBar'
 import AdsenseSlot from '@/components/AdsenseSlot'
-import { articles, getArticle } from '@/data/mock'
+import { getPostBySlug, getPosts } from '@/lib/wp'
 
 interface Props {
   params: { slug: string }
 }
 
-export function generateStaticParams() {
-  return articles.map((a) => ({ slug: a.slug }))
+export async function generateStaticParams() {
+  const posts = await getPosts({ page: 1, perPage: 100 })
+  return posts.map((a) => ({ slug: a.slug }))
 }
 
-export default function ArticlePage({ params }: Props) {
-  const article = getArticle(params.slug)
+export default async function ArticlePage({ params }: Props) {
+  const article = await getPostBySlug(params.slug)
   if (!article) return <div>Articolul nu a fost găsit.</div>
 
   return (
