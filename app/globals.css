@@ -3,5 +3,18 @@
 @tailwind utilities;
 
 body {
-  @apply bg-white text-gray-900 antialiased;
+  @apply bg-white text-gray-900 antialiased font-sans;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-serif text-gray-900;
+}
+
+a {
+  @apply hover:text-accent;
 }
