@@ -26,7 +26,11 @@ Fișierele statice vor fi generate în directorul `out/` și pot fi încărcate 
 
 ### Variabile de mediu
 
-Aplicația folosește un endpoint WordPress GraphQL pentru a prelua articole. Pentru dezvoltare locală creează un fișier `.env.local` cu următoarele valori:
+Aplicația folosește un endpoint WordPress GraphQL pentru a prelua articole. Pentru dezvoltare locală, copiază fișierul `.env.example` în `.env.local` și completează valorile necesare:
+
+```bash
+cp .env.example .env.local
+```
 
 ```
 SITE_URL=http://localhost:3000
