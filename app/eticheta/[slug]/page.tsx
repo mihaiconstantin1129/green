@@ -1,25 +1,12 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getTagBySlug, fixtures, type Post } from '@/lib/wp'
-import Seo, { normalizeSeo, seoToMetadata } from '@/components/Seo'
+import SeoHead from '@/components/SeoHead'
+import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export function generateStaticParams() {
   return fixtures.tags.map((t) => ({ slug: t.slug }))
-}
-
-export async function generateMetadata({ params }: Props) {
-  const { tag } = await getTagBySlug(params.slug, { page: 1, perPage: 10 })
-  if (!tag) return {}
-  const seoData = normalizeSeo({
-    seo: tag.seo,
-    wpTitle: tag.name,
-    wpExcerpt: `Articole etichetate ${tag.name}`,
-    url: tag.uri || `/eticheta/${tag.slug}`,
-    siteName: 'Green News România',
-    siteUrl,
-  })
-  return seoToMetadata(seoData)
 }
 
 interface Props {
@@ -50,7 +37,7 @@ export default async function TagPage({ params }: Props) {
 
     return (
       <>
-        <Seo jsonLd={jsonLd} />
+        <SeoHead seo={seoData} jsonLd={jsonLd} />
         <div>
         <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Etichetă: ${tag.name}` }]} />
         <h1 className="text-3xl font-bold mb-6">Etichetă: {tag.name}</h1>

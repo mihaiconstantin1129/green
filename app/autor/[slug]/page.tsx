@@ -1,7 +1,8 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getAuthorBySlug, fixtures, type Post } from '@/lib/wp'
-import Seo, { normalizeSeo, seoToMetadata } from '@/components/Seo'
+import SeoHead from '@/components/SeoHead'
+import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export function generateStaticParams() {
@@ -10,20 +11,6 @@ export function generateStaticParams() {
 
 interface Props {
   params: { slug: string }
-}
-
-export async function generateMetadata({ params }: Props) {
-  const { author } = await getAuthorBySlug(params.slug, { page: 1, perPage: 10 })
-  if (!author) return {}
-  const seoData = normalizeSeo({
-    seo: (author as any).seo,
-    wpTitle: author.name,
-    wpExcerpt: `Articole scrise de ${author.name}`,
-    url: `/autor/${author.slug}`,
-    siteName: 'Green News România',
-    siteUrl,
-  })
-  return seoToMetadata(seoData)
 }
 
 export default async function AuthorPage({ params }: Props) {
@@ -49,7 +36,7 @@ export default async function AuthorPage({ params }: Props) {
 
     return (
       <>
-        <Seo jsonLd={jsonLd} />
+        <SeoHead seo={seoData} jsonLd={jsonLd} />
         <div>
           <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Autor: ${author.name}` }]} />
           <h1 className="text-3xl font-bold mb-6">Autor: {author.name}</h1>

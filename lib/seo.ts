@@ -22,6 +22,18 @@ export type WPSeo = {
   schema?: { raw?: string | null } | null;
 };
 
+function absoluteUrl(raw?: string | null, siteUrl?: string) {
+  if (!raw) return undefined;
+  if (!siteUrl) return raw || undefined;
+  try {
+    const base = new URL(siteUrl).origin;
+    const url = raw.startsWith('http') ? new URL(raw) : new URL(raw, base);
+    return new URL(url.pathname + url.search + url.hash, base).toString();
+  } catch {
+    return raw.startsWith('/') ? `${siteUrl}${raw}` : raw;
+  }
+}
+
 export function normalizeSeo(input: {
   seo?: WPSeo | null;
   wpTitle?: string;
@@ -35,9 +47,7 @@ export function normalizeSeo(input: {
   const description = (seo?.metaDesc ?? wpExcerpt ?? '')
     .replace(/<[^>]*>?/gm, '')
     .slice(0, 160);
-  const canonical =
-    seo?.canonical ??
-    (url?.startsWith('http') ? url : `${siteUrl ?? ''}${url ?? ''}`);
+  const canonical = absoluteUrl(seo?.canonical ?? url, siteUrl);
 
   const robotsArr = [
     seo?.metaRobotsNoindex === 'noindex' ? 'noindex' : null,
@@ -46,11 +56,15 @@ export function normalizeSeo(input: {
   const robots = robotsArr.length > 0 ? robotsArr.join(', ') : undefined;
 
   const rawOg = seo?.opengraphImage?.sourceUrl ?? undefined;
-  const ogImage =
-    rawOg && !rawOg.startsWith('http') ? `${siteUrl ?? ''}${rawOg}` : rawOg;
+  const ogImage = absoluteUrl(rawOg, siteUrl);
   const rawTw = seo?.twitterImage?.sourceUrl ?? rawOg;
-  const twImage =
-    rawTw && !rawTw.startsWith('http') ? `${siteUrl ?? ''}${rawTw}` : rawTw;
+  const twImage = absoluteUrl(rawTw, siteUrl);
+  const ogUrl = absoluteUrl(seo?.opengraphUrl ?? canonical, siteUrl);
+
+  const breadcrumbs = (seo?.breadcrumbs ?? []).map((b) => ({
+    text: b.text,
+    url: absoluteUrl(b.url, siteUrl) ?? '',
+  }));
 
   return {
     title,
@@ -61,7 +75,7 @@ export function normalizeSeo(input: {
       title: seo?.opengraphTitle ?? title,
       description: seo?.opengraphDescription ?? description,
       type: seo?.opengraphType ?? 'article',
-      url: seo?.opengraphUrl ?? canonical,
+      url: ogUrl ?? canonical,
       siteName: seo?.opengraphSiteName ?? siteName,
       image: ogImage,
       imageWidth: seo?.opengraphImage?.mediaDetails?.width ?? undefined,
@@ -69,13 +83,13 @@ export function normalizeSeo(input: {
       imageAlt: seo?.opengraphImage?.altText ?? undefined,
     },
     twitter: {
-      card: ogImage ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: seo?.twitterTitle ?? title,
       description: seo?.twitterDescription ?? description,
       image: twImage,
     },
     schema: seo?.schema?.raw ?? null,
-    breadcrumbs: seo?.breadcrumbs ?? [],
+    breadcrumbs,
   };
 }
 
