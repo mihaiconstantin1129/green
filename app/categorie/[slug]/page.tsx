@@ -11,7 +11,6 @@ export async function generateStaticParams() {
 
 interface Props {
   params: { slug: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -29,8 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const page = parseInt((searchParams?.pagina as string) || '1')
+export default async function CategoryPage({ params }: Props) {
+  const page = 1
   try {
     const { category, posts } = await getCategoryBySlug(params.slug, { page, perPage: 10 })
     if (!category) return <div>Categorie necunoscută.</div>

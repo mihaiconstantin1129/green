@@ -4,14 +4,8 @@ import AdsenseSlot from '@/components/AdsenseSlot'
 import FeaturedArticle from '@/components/FeaturedArticle'
 import { getPosts, getFeaturedPost } from '@/lib/wp'
 
-interface Props {
-  searchParams?: { [key: string]: string | string[] | undefined }
-}
-
-export const dynamic = 'force-dynamic'
-
-export default async function HomePage({ searchParams }: Props) {
-  const page = parseInt((searchParams?.pagina as string) || '1')
+export default async function HomePage() {
+  const page = 1
   try {
     const [featured, articles] = await Promise.all([
       getFeaturedPost().catch(() => undefined),

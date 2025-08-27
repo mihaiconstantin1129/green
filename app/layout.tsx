@@ -5,15 +5,9 @@ import { getCategories } from '@/lib/wp'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
 import AdsenseSlot from '@/components/AdsenseSlot'
-import { Inter, Playfair_Display } from 'next/font/google'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -44,7 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     catError = true
   }
   return (
-    <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="ro">
       <head>
         <script
           type="application/ld+json"

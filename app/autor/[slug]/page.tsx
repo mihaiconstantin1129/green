@@ -8,11 +8,10 @@ export function generateStaticParams() {
 
 interface Props {
   params: { slug: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
-export default async function AuthorPage({ params, searchParams }: Props) {
-  const page = parseInt((searchParams?.pagina as string) || '1')
+export default async function AuthorPage({ params }: Props) {
+  const page = 1
   try {
     const { author, posts } = await getAuthorBySlug(params.slug, { page, perPage: 10 })
     if (!author) return <div>Autor necunoscut.</div>
