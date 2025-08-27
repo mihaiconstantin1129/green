@@ -21,7 +21,7 @@ export default async function HomePage() {
     const seoData = normalizeSeo({
       seo: homepage?.seo,
       wpTitle: homepage?.title,
-      wpExcerpt: homepage?.excerpt,
+      wpExcerpt: homepage?.excerpt ?? '',
       url: '/',
       siteName: 'Green News România',
       siteUrl,
