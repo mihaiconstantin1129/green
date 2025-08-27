@@ -1,3 +1,5 @@
+import { CACHE_CONTROL_HEADER } from '@/lib/cache'
+
 export const dynamic = 'force-static'
 
 export async function GET() {
@@ -9,6 +11,7 @@ export async function GET() {
   return new Response(content, {
     headers: {
       'Content-Type': 'text/plain',
+      'Cache-Control': CACHE_CONTROL_HEADER,
     },
   })
 }
