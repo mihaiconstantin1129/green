@@ -5,6 +5,9 @@ import FeaturedArticle from '@/components/FeaturedArticle'
 import { getPosts, getFeaturedPost, getPageBySlug } from '@/lib/wp'
 import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
+import { CACHE_TTL } from '@/lib/cache'
+
+export const revalidate = CACHE_TTL
 
 export default async function HomePage() {
   const page = 1

@@ -6,6 +6,7 @@ import authorsFixture from './fixtures/authors.json'
 import categoriesFixture from './fixtures/categories.json'
 import postsFixture from './fixtures/posts.json'
 import type { WPSeo } from './seo'
+import { CACHE_TTL } from './cache'
 
 export interface Term { slug: string; name: string; uri?: string; seo?: WPSeo | null }
 export interface Author { slug: string; name: string }
@@ -150,7 +151,8 @@ async function fetchGraphQL<T>(query: string, variables: any): Promise<T> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 60 },
+    cache: 'force-cache',
+    next: { revalidate: CACHE_TTL },
   })
   if (!res.ok) {
     console.error('GraphQL fetch error', res.status)

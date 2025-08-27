@@ -1,5 +1,6 @@
 import { getPosts } from '@/lib/wp'
 import { siteUrl } from '@/lib/utils'
+import { CACHE_CONTROL_HEADER } from '@/lib/cache'
 
 export const dynamic = 'force-static'
 
@@ -19,6 +20,7 @@ export async function GET() {
     return new Response(xml, {
       headers: {
         'Content-Type': 'application/xml',
+        'Cache-Control': CACHE_CONTROL_HEADER,
       },
     })
   } catch (e) {

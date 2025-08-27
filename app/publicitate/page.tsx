@@ -3,6 +3,9 @@ import SeoHead from '@/components/SeoHead'
 import { getPageBySlug } from '@/lib/wp'
 import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
+import { CACHE_TTL } from '@/lib/cache'
+
+export const revalidate = CACHE_TTL
 
 export default async function AdsPage() {
   const page = await getPageBySlug('publicitate').catch(() => undefined)
