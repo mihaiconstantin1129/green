@@ -6,8 +6,7 @@ import SidebarPopular from '@/components/SidebarPopular'
 import ArticleCard from '@/components/ArticleCard'
 import Image from 'next/image'
 import { getPostBySlug, getPosts } from '@/lib/wp'
-import Seo from '@/components/Seo'
-import { normalizeSeo } from '@/lib/seo'
+import Seo, { normalizeSeo, seoToMetadata } from '@/components/Seo'
 import { siteUrl } from '@/lib/utils'
 
 interface Props {
@@ -17,6 +16,20 @@ interface Props {
 export async function generateStaticParams() {
   const posts = await getPosts({ page: 1, perPage: 100 })
   return posts.map((a) => ({ slug: a.slug }))
+}
+
+export async function generateMetadata({ params }: Props) {
+  const article = await getPostBySlug(params.slug)
+  if (!article) return {}
+  const seoData = normalizeSeo({
+    seo: article.seo,
+    wpTitle: article.title,
+    wpExcerpt: article.excerpt,
+    url: article.uri || `/stiri/${article.slug}`,
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -34,10 +47,32 @@ export default async function ArticlePage({ params }: Props) {
       siteName: 'Green News România',
       siteUrl,
     })
+    const jsonLd =
+      article.seo?.schema?.raw ?? {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        headline: article.title,
+        image: article.image ? [article.image] : undefined,
+        datePublished: article.date,
+        dateModified: article.modified,
+        author: {
+          '@type': 'Person',
+          name: article.author.name,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Green News România',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${siteUrl}/logo.png`,
+          },
+        },
+        mainEntityOfPage: seoData.canonical,
+      }
 
     return (
       <>
-        <Seo data={seoData} />
+        <Seo jsonLd={jsonLd} />
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
         <div className="lg:flex lg:gap-8">

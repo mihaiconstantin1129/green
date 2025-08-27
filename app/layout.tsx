@@ -6,8 +6,7 @@ import { siteUrl } from '@/lib/utils'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { SeoProvider } from '@/components/SeoProvider'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata } from '@/lib/seo'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 const inter = Inter({
@@ -20,6 +19,16 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 })
 
+export const metadata = seoToMetadata(
+  normalizeSeo({
+    wpTitle: 'Green News România',
+    wpExcerpt: 'Portal de știri din România',
+    url: '/',
+    siteName: 'Green News România',
+    siteUrl,
+  })
+)
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   let categories: { slug: string; name: string }[] = []
   let catError = false
@@ -29,13 +38,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     console.error(e)
     catError = true
   }
-  const seoData = normalizeSeo({
-    wpTitle: 'Green News România',
-    wpExcerpt: 'Portal de știri din România',
-    url: '/',
-    siteName: 'Green News România',
-    siteUrl,
-  })
   return (
     <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
       <head>
@@ -54,7 +56,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
       </head>
       <body className="flex min-h-screen flex-col bg-white text-black">
-        <SeoProvider defaultData={seoData}>
           <header className="sticky top-0 z-50 border-b bg-white">
             <AdsenseSlot className="w-full min-h-[90px] border-b" />
             <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
@@ -157,7 +158,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               rezervate.
             </div>
           </footer>
-        </SeoProvider>
       </body>
     </html>
   )

@@ -1,10 +1,9 @@
 import ProseContent from '@/components/ProseContent'
 import { getPageBySlug } from '@/lib/wp'
-import Seo from '@/components/Seo'
-import { normalizeSeo } from '@/lib/seo'
+import Seo, { normalizeSeo, seoToMetadata } from '@/components/Seo'
 import { siteUrl } from '@/lib/utils'
 
-export default async function PrivacyPage() {
+export async function generateMetadata() {
   const page = await getPageBySlug('confidentialitate').catch(() => undefined)
   const seoData = normalizeSeo({
     seo: page?.seo,
@@ -14,9 +13,23 @@ export default async function PrivacyPage() {
     siteName: 'Green News România',
     siteUrl,
   })
+  return seoToMetadata(seoData)
+}
+
+export default async function PrivacyPage() {
+  const page = await getPageBySlug('confidentialitate').catch(() => undefined)
+  const jsonLd =
+    page?.seo?.schema?.raw ?? {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: page?.title || 'Politica de confidențialitate',
+      description:
+        page?.excerpt?.replace(/<[^>]*>?/gm, '') || 'Politica de confidențialitate',
+      url: `${siteUrl}/confidentialitate`,
+    }
   return (
     <>
-      <Seo data={seoData} />
+      <Seo jsonLd={jsonLd} />
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-4">{page?.title || 'Politica de confidențialitate'}</h1>
         <ProseContent html={page?.content || '<p>Aceasta este politica noastră de confidențialitate.</p>'} />

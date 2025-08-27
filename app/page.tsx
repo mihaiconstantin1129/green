@@ -3,9 +3,21 @@ import SidebarPopular from '@/components/SidebarPopular'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import FeaturedArticle from '@/components/FeaturedArticle'
 import { getPosts, getFeaturedPost, getPageBySlug } from '@/lib/wp'
-import Seo from '@/components/Seo'
-import { normalizeSeo } from '@/lib/seo'
+import Seo, { normalizeSeo, seoToMetadata } from '@/components/Seo'
 import { siteUrl } from '@/lib/utils'
+
+export async function generateMetadata() {
+  const homepage = await getPageBySlug('acasa').catch(() => undefined)
+  const seoData = normalizeSeo({
+    seo: homepage?.seo,
+    wpTitle: homepage?.title,
+    wpExcerpt: homepage?.excerpt ?? '',
+    url: '/',
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
+}
 
 export default async function HomePage() {
   const page = 1
@@ -18,17 +30,21 @@ export default async function HomePage() {
     const list = featured
       ? articles.filter((a) => a.slug !== featured.slug)
       : articles
-    const seoData = normalizeSeo({
-      seo: homepage?.seo,
-      wpTitle: homepage?.title,
-      wpExcerpt: homepage?.excerpt ?? '',
-      url: '/',
-      siteName: 'Green News România',
-      siteUrl,
-    })
+    const jsonLd =
+      homepage?.seo?.schema?.raw ??
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: homepage?.title ?? 'Green News România',
+        description:
+          homepage?.excerpt?.replace(/<[^>]*>?/gm, '') ??
+          'Portal de știri din România',
+        url: `${siteUrl}/`,
+      }
+
     return (
       <>
-        <Seo data={seoData} />
+        <Seo jsonLd={jsonLd} />
         <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
         <div className="space-y-8">
           {featured && <FeaturedArticle article={featured} />}
