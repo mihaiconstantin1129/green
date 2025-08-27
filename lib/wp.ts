@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import sharp from 'sharp'
 import tagsFixture from './fixtures/tags.json'
 import authorsFixture from './fixtures/authors.json'
 import categoriesFixture from './fixtures/categories.json'
@@ -40,15 +41,16 @@ async function cacheImage(url: string): Promise<string> {
     const filename = path.basename(parsed.pathname)
     const imgDir = path.join(process.cwd(), 'public', 'img')
     await fs.promises.mkdir(imgDir, { recursive: true })
-    const filePath = path.join(imgDir, filename)
-    if (!fs.existsSync(filePath)) {
+    const webpName = filename.replace(/\.[^./]+$/, '.webp')
+    const webpPath = path.join(imgDir, webpName)
+    if (!fs.existsSync(webpPath)) {
       const res = await fetch(url)
       if (res.ok) {
         const buf = Buffer.from(await res.arrayBuffer())
-        await fs.promises.writeFile(filePath, buf)
+        await sharp(buf).webp().toFile(webpPath)
       }
     }
-    return `/img/${filename}`
+    return `/img/${webpName}`
   } catch {
     return url
   }
@@ -114,11 +116,30 @@ const SEO_FIELDS = `
   schema { raw }
 `
 
+const SEO_USER_FIELDS = `
+  title
+  metaDesc
+  canonical
+  metaRobotsNoindex
+  metaRobotsNofollow
+  opengraphTitle
+  opengraphDescription
+  opengraphImage {
+    sourceUrl
+    altText
+    mediaDetails { width height }
+  }
+  twitterTitle
+  twitterDescription
+  twitterImage { sourceUrl }
+  schema { raw }
+`
+
 const SEO_POST_FRAGMENT = `fragment SeoFieldsOnPost on Post {\n  seo {\n${SEO_FIELDS}\n  }\n}`
 const SEO_PAGE_FRAGMENT = `fragment SeoFieldsOnPage on Page {\n  seo {\n${SEO_FIELDS}\n  }\n}`
 const SEO_CATEGORY_FRAGMENT = `fragment SeoFieldsOnCategory on Category {\n  seo {\n${SEO_FIELDS}\n  }\n}`
 const SEO_TAG_FRAGMENT = `fragment SeoFieldsOnTag on Tag {\n  seo {\n${SEO_FIELDS}\n  }\n}`
-const SEO_USER_FRAGMENT = `fragment SeoFieldsOnUser on User {\n  seo {\n${SEO_FIELDS}\n  }\n}`
+const SEO_USER_FRAGMENT = `fragment SeoFieldsOnUser on User {\n  seo {\n${SEO_USER_FIELDS}\n  }\n}`
 
 async function fetchGraphQL<T>(query: string, variables: any): Promise<T> {
   if (!endpoint) throw new Error('Endpoint missing')
