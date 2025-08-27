@@ -47,7 +47,10 @@ async function cacheImage(url: string): Promise<string> {
       const res = await fetch(url)
       if (res.ok) {
         const buf = Buffer.from(await res.arrayBuffer())
-        await sharp(buf).webp().toFile(webpPath)
+        await sharp(buf)
+          .resize({ width: 1200, withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toFile(webpPath)
       }
     }
     return `/img/${webpName}`
