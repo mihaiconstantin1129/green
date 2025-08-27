@@ -32,6 +32,30 @@ export interface Page {
 
 const endpoint = process.env.WP_GRAPHQL_ENDPOINT
 
+export function rewriteCmsHost(url: string | null | undefined): string {
+  if (!url) return ''
+  return url.replace(/https?:\/\/cms\.green-news\.ro/gi, 'https://green-news.ro')
+}
+
+function rewriteSeo(seo: WPSeo | null | undefined): WPSeo | undefined {
+  if (!seo) return undefined
+  return {
+    ...seo,
+    opengraphImage: seo.opengraphImage
+      ? {
+          ...seo.opengraphImage,
+          sourceUrl: rewriteCmsHost(seo.opengraphImage.sourceUrl ?? ''),
+        }
+      : null,
+    twitterImage: seo.twitterImage
+      ? {
+          ...seo.twitterImage,
+          sourceUrl: rewriteCmsHost(seo.twitterImage.sourceUrl ?? ''),
+        }
+      : null,
+  }
+}
+
 const SEO_FIELDS = `
   title
   metaDesc
@@ -87,8 +111,8 @@ function mapPost(node: any): Post {
     uri: node.uri ?? '',
     title: node.title,
     excerpt: node.excerpt,
-    content: node.content,
-    image: node.featuredImage?.node?.sourceUrl ?? '',
+    content: rewriteCmsHost(node.content ?? ''),
+    image: rewriteCmsHost(node.featuredImage?.node?.sourceUrl ?? ''),
     date: node.date ?? '',
     modified: node.modified ?? '',
     categories:
@@ -98,7 +122,7 @@ function mapPost(node: any): Post {
       slug: node.author?.node?.slug ?? '',
       name: node.author?.node?.name ?? '',
     },
-    seo: node.seo ?? undefined,
+    seo: rewriteSeo(node.seo),
   }
 }
 
@@ -164,8 +188,8 @@ export async function getPageBySlug(slug: string): Promise<Page | undefined> {
           slug: node.slug,
           uri: node.uri ?? '',
           title: node.title,
-          content: node.content ?? '',
-          seo: node.seo ?? undefined,
+          content: rewriteCmsHost(node.content ?? ''),
+          seo: rewriteSeo(node.seo),
         }
       : undefined
   } catch (e) {
@@ -187,7 +211,7 @@ export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }
             slug: data.category.slug,
             name: data.category.name,
             uri: data.category.uri ?? '',
-            seo: data.category.seo ?? undefined,
+            seo: rewriteSeo(data.category.seo),
           }
         : undefined,
       posts: data.category ? data.category.posts.nodes.slice(start, end).map(mapPost) : [],
@@ -218,7 +242,7 @@ export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { p
             slug: data.tag.slug,
             name: data.tag.name,
             uri: data.tag.uri ?? '',
-            seo: data.tag.seo ?? undefined,
+            seo: rewriteSeo(data.tag.seo),
           }
         : undefined,
       posts: data.tag ? data.tag.posts.nodes.slice(start, end).map(mapPost) : [],
@@ -245,7 +269,11 @@ export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: 
     const end = start + perPage
     return {
       author: data.user
-        ? { slug: data.user.slug, name: data.user.name, seo: data.user.seo ?? undefined }
+        ? {
+            slug: data.user.slug,
+            name: data.user.name,
+            seo: rewriteSeo(data.user.seo),
+          }
         : undefined,
       posts: data.user ? data.user.posts.nodes.slice(start, end).map(mapPost) : [],
     }
