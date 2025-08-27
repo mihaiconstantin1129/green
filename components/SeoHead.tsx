@@ -1,3 +1,4 @@
+"use client";
 import Head from 'next/head';
 
 export default function SeoHead({ data }: { data: ReturnType<typeof import('../lib/seo').normalizeSeo> }) {
