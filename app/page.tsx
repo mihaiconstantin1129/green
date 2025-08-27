@@ -10,8 +10,8 @@ export async function generateMetadata() {
   const homepage = await getPageBySlug('acasa').catch(() => undefined)
   const seoData = normalizeSeo({
     seo: homepage?.seo,
-    wpTitle: homepage?.title,
-    wpExcerpt: homepage?.excerpt ?? '',
+    wpTitle: homepage?.title ?? 'Green News România',
+    wpExcerpt: homepage?.excerpt ?? 'Portal de știri din România',
     url: '/',
     siteName: 'Green News România',
     siteUrl,
