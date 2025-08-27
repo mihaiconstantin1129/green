@@ -1,17 +1,19 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import ResponsiveImage from './ResponsiveImage'
 import type { Post } from '@/lib/wp'
 
 export default function ArticleCard({ article }: { article: Post }) {
   return (
     <article className="overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link href={`/stiri/${article.slug}`}>
-        <Image
+        <ResponsiveImage
           src={article.image}
           alt={article.title}
           width={800}
           height={450}
           className="h-48 w-full object-cover"
+          widths={[480, 800]}
+          sizes="(max-width: 768px) 100vw, 33vw"
         />
       </Link>
       <div className="space-y-2 p-4">
