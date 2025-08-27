@@ -6,7 +6,8 @@ import SidebarPopular from '@/components/SidebarPopular'
 import ArticleCard from '@/components/ArticleCard'
 import Image from 'next/image'
 import { getPostBySlug, getPosts } from '@/lib/wp'
-import type { Metadata } from 'next'
+import SeoHead from '@/components/SeoHead'
+import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 interface Props {
@@ -18,31 +19,6 @@ export async function generateStaticParams() {
   return posts.map((a) => ({ slug: a.slug }))
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  try {
-    const article = await getPostBySlug(params.slug)
-    if (!article)
-      return {
-        title: 'Articol',
-      }
-    const url = `${siteUrl}/stiri/${article.slug}`
-    return {
-      title: article.title,
-      description: article.excerpt,
-      openGraph: {
-        title: article.title,
-        description: article.excerpt,
-        type: 'article',
-        images: article.image ? [{ url: article.image }] : undefined,
-        url,
-      },
-      alternates: { canonical: url },
-    }
-  } catch {
-    return { title: 'Articol' }
-  }
-}
-
 export default async function ArticlePage({ params }: Props) {
   try {
     const article = await getPostBySlug(params.slug)
@@ -50,10 +26,20 @@ export default async function ArticlePage({ params }: Props) {
     const recommended = (await getPosts({ page: 1, perPage: 3 })).filter(
       (p) => p.slug !== article.slug
     )
+    const seoData = normalizeSeo({
+      seo: article.seo,
+      wpTitle: article.title,
+      wpExcerpt: article.excerpt,
+      url: article.uri || `/stiri/${article.slug}`,
+      siteName: 'Green News România',
+      siteUrl,
+    })
 
     return (
-      <div className="mx-auto max-w-7xl">
-        <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
+      <>
+        <SeoHead data={seoData} />
+        <div className="mx-auto max-w-7xl">
+          <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
         <div className="lg:flex lg:gap-8">
           <article className="flex-1">
             <h1 className="mb-4 text-4xl font-serif font-bold leading-tight">
@@ -89,48 +75,8 @@ export default async function ArticlePage({ params }: Props) {
             <SidebarPopular />
           </aside>
         </div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BreadcrumbList',
-              itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'Acasă', item: siteUrl },
-                {
-                  '@type': 'ListItem',
-                  position: 2,
-                  name: article.title,
-                  item: `${siteUrl}/stiri/${article.slug}`,
-                },
-              ],
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'NewsArticle',
-              headline: article.title,
-              image: [article.image],
-              datePublished: article.date,
-              dateModified: article.modified,
-              author: { '@type': 'Person', name: article.author.name },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Green News România',
-                logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png` },
-              },
-              mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': `${siteUrl}/stiri/${article.slug}`,
-              },
-            }),
-          }}
-        />
-      </div>
+        </div>
+      </>
     )
   } catch (e) {
     console.error(e)
