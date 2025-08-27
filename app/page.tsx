@@ -3,8 +3,7 @@ import SidebarPopular from '@/components/SidebarPopular'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import FeaturedArticle from '@/components/FeaturedArticle'
 import { getPosts, getFeaturedPost, getPageBySlug } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export default async function HomePage() {
@@ -18,14 +17,6 @@ export default async function HomePage() {
     const list = featured
       ? articles.filter((a) => a.slug !== featured.slug)
       : articles
-    const seoData = normalizeSeo({
-      seo: homepage?.seo,
-      wpTitle: homepage?.title ?? 'Green News România',
-      wpExcerpt: homepage?.excerpt ?? 'Portal de știri din România',
-      url: '/',
-      siteName: 'Green News România',
-      siteUrl,
-    })
     const jsonLd =
       homepage?.seo?.schema?.raw ??
       {
@@ -40,7 +31,12 @@ export default async function HomePage() {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
         <div className="space-y-8">
           {featured && <FeaturedArticle article={featured} />}
@@ -68,4 +64,17 @@ export default async function HomePage() {
       <p className="text-red-500">Eroare la încărcarea articolelor.</p>
     )
   }
+}
+
+export async function generateMetadata() {
+  const homepage = await getPageBySlug('acasa').catch(() => undefined)
+  const seoData = normalizeSeo({
+    seo: homepage?.seo,
+    wpTitle: homepage?.title ?? 'Green News România',
+    wpExcerpt: homepage?.excerpt ?? 'Portal de știri din România',
+    url: '/',
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }

@@ -1,8 +1,7 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getCategoryBySlug, getCategories, type Post } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export async function generateStaticParams() {
@@ -19,14 +18,6 @@ export default async function CategoryPage({ params }: Props) {
   try {
     const { category, posts } = await getCategoryBySlug(params.slug, { page, perPage: 10 })
     if (!category) return <div>Categorie necunoscută.</div>
-    const seoData = normalizeSeo({
-      seo: category.seo,
-      wpTitle: category.name,
-      wpExcerpt: `Știri din categoria ${category.name}`,
-      url: category.uri || `/categorie/${category.slug}`,
-      siteName: 'Green News România',
-      siteUrl,
-    })
     const jsonLd =
       category.seo?.schema?.raw ?? {
         '@context': 'https://schema.org',
@@ -38,7 +29,12 @@ export default async function CategoryPage({ params }: Props) {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div>
         <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: category.name }]} />
         <h1 className="text-3xl font-bold mb-6">{category.name}</h1>
@@ -58,4 +54,18 @@ export default async function CategoryPage({ params }: Props) {
       <p className="text-red-500">Eroare la încărcarea categoriei.</p>
     )
   }
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { category } = await getCategoryBySlug(params.slug, { page: 1, perPage: 1 })
+  if (!category) return {}
+  const seoData = normalizeSeo({
+    seo: category.seo,
+    wpTitle: category.name,
+    wpExcerpt: `Știri din categoria ${category.name}`,
+    url: category.uri || `/categorie/${category.slug}`,
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }

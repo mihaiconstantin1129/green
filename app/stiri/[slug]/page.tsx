@@ -6,8 +6,7 @@ import SidebarPopular from '@/components/SidebarPopular'
 import ArticleCard from '@/components/ArticleCard'
 import Image from 'next/image'
 import { getPostBySlug, getPosts } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 interface Props {
@@ -17,6 +16,20 @@ interface Props {
 export async function generateStaticParams() {
   const posts = await getPosts({ page: 1, perPage: 100 })
   return posts.map((a) => ({ slug: a.slug }))
+}
+
+export async function generateMetadata({ params }: Props) {
+  const article = await getPostBySlug(params.slug).catch(() => undefined)
+  if (!article) return {}
+  const seoData = normalizeSeo({
+    seo: article.seo,
+    wpTitle: article.title,
+    wpExcerpt: article.excerpt,
+    url: article.uri || `/stiri/${article.slug}`,
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -59,7 +72,12 @@ export default async function ArticlePage({ params }: Props) {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
         <div className="lg:flex lg:gap-8">

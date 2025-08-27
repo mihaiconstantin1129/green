@@ -1,8 +1,7 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getTagBySlug, fixtures, type Post } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export function generateStaticParams() {
@@ -18,14 +17,6 @@ export default async function TagPage({ params }: Props) {
   try {
     const { tag, posts } = await getTagBySlug(params.slug, { page, perPage: 10 })
     if (!tag) return <div>Eticheta nu există.</div>
-    const seoData = normalizeSeo({
-      seo: tag.seo,
-      wpTitle: tag.name,
-      wpExcerpt: `Articole etichetate ${tag.name}`,
-      url: tag.uri || `/eticheta/${tag.slug}`,
-      siteName: 'Green News România',
-      siteUrl,
-    })
     const jsonLd =
       tag.seo?.schema?.raw ?? {
         '@context': 'https://schema.org',
@@ -37,7 +28,12 @@ export default async function TagPage({ params }: Props) {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div>
         <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Etichetă: ${tag.name}` }]} />
         <h1 className="text-3xl font-bold mb-6">Etichetă: {tag.name}</h1>
@@ -57,4 +53,18 @@ export default async function TagPage({ params }: Props) {
       <p className="text-red-500">Eroare la încărcarea etichetei.</p>
     )
   }
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { tag } = await getTagBySlug(params.slug, { page: 1, perPage: 1 })
+  if (!tag) return {}
+  const seoData = normalizeSeo({
+    seo: tag.seo,
+    wpTitle: tag.name,
+    wpExcerpt: `Articole etichetate ${tag.name}`,
+    url: tag.uri || `/eticheta/${tag.slug}`,
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }
