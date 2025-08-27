@@ -7,6 +7,17 @@ import { siteUrl } from '@/lib/utils'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Inter, Playfair_Display } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-inter',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-playfair',
+})
 
 
 export const metadata: Metadata = {
@@ -38,7 +49,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     catError = true
   }
   return (
-    <html lang="ro">
+    <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
       <head>
         <meta name="google-adsense-account" content="ca-pub-9593023557482879" />
         <script
