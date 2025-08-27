@@ -2,11 +2,12 @@ import './globals.css'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 import { getCategories } from '@/lib/wp'
-import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import SeoHead from '@/components/SeoHead'
+import { normalizeSeo } from '@/lib/seo'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 const inter = Inter({
@@ -19,26 +20,6 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 })
 
-
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: 'Green News România',
-    template: '%s | Green News România',
-  },
-  description: 'Portal de știri din România',
-  openGraph: {
-    title: 'Green News România',
-    description: 'Portal de știri din România',
-    url: siteUrl,
-    siteName: 'Green News România',
-    type: 'website',
-  },
-  alternates: {
-    canonical: siteUrl,
-  },
-}
-
 export default async function RootLayout({ children }: { children: ReactNode }) {
   let categories: { slug: string; name: string }[] = []
   let catError = false
@@ -48,8 +29,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     console.error(e)
     catError = true
   }
+  const seoData = normalizeSeo({
+    wpTitle: 'Green News România',
+    wpExcerpt: 'Portal de știri din România',
+    url: '/',
+    siteName: 'Green News România',
+    siteUrl,
+  })
   return (
     <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
+      <SeoHead data={seoData} />
       <head>
         <meta name="google-adsense-account" content="ca-pub-9593023557482879" />
         <script
