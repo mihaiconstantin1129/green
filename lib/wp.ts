@@ -74,7 +74,7 @@ export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perP
 }
 
 export async function getFeaturedPost(): Promise<Post | undefined> {
-  const query = `query Featured{\n    posts(where:{sticky:true}, first:1){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n  }`
+  const query = `query Featured{\n    posts(where:{onlySticky:true}, first:1){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl}}}}\n  }`
   const data = await fetchGraphQL<any>(query, {})
   const node = data?.posts?.nodes?.[0]
   return node ? mapPost(node) : undefined

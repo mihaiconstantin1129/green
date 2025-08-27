@@ -14,7 +14,7 @@ export default async function HomePage({ searchParams }: Props) {
   const page = parseInt((searchParams?.pagina as string) || '1')
   try {
     const [featured, articles] = await Promise.all([
-      getFeaturedPost(),
+      getFeaturedPost().catch(() => undefined),
       getPosts({ page, perPage: 9 }),
     ])
     const list = featured
