@@ -18,3 +18,15 @@ test('seoToMetadata maps basic fields', () => {
   assert.equal(meta.description, 'Desc');
   assert.equal(meta.openGraph?.images?.[0].url, 'https://example.com/img.jpg');
 });
+
+test('normalizeSeo strips /wp prefix from URLs', () => {
+  const seo = normalizeSeo({
+    seo: {
+      canonical: 'https://cms.example.com/wp/sample',
+      opengraphUrl: 'https://cms.example.com/wp/sample',
+    },
+    siteUrl: 'https://example.com',
+  });
+  assert.equal(seo.canonical, 'https://example.com/sample');
+  assert.equal(seo.og.url, 'https://example.com/sample');
+});

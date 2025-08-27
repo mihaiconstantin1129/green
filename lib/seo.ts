@@ -60,7 +60,10 @@ function absoluteUrl(raw?: string | null, siteUrl?: string) {
   try {
     const base = new URL(siteUrl).origin;
     const url = raw.startsWith('http') ? new URL(raw) : new URL(raw, base);
-    return new URL(url.pathname + url.search + url.hash, base).toString();
+    let path = url.pathname + url.search + url.hash;
+    // Remove WordPress subdirectory (e.g. "/wp/") from generated URLs
+    path = path.replace(/^\/wp(\/|$)/, '/');
+    return new URL(path, base).toString();
   } catch {
     return raw.startsWith('/') ? `${siteUrl}${raw}` : raw;
   }
