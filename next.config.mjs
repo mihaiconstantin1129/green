@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   images: {
+    // `output: "export"` disables the default Image Optimization, so all images
+    // are served as static files. `unoptimized: true` is set automatically but
+    // included here for clarity.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

@@ -10,19 +10,19 @@ Acest proiect este un site de știri static construit cu Next.js 14 (App Router)
    pnpm i
    ```
 
-2. Build al aplicației:
+2. Build și export static al aplicației:
 
    ```bash
    pnpm build
    ```
 
-3. Export static:
+   Fișierele statice vor fi generate în directorul `out/` și pot fi încărcate pe hostingul tău (de exemplu, CyberFolks).
+
+   Pentru o previzualizare locală după build poți rula:
 
    ```bash
-   pnpm export
+   pnpm start
    ```
-
-Fișierele statice vor fi generate în directorul `out/` și pot fi încărcate pe hostingul tău (de exemplu, CyberFolks).
 
 ### Variabile de mediu
 
