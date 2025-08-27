@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   alt="Green News România"
                   width={120}
                   height={65}
-                  className="h-8 w-auto"
+                  className="h-11 w-auto"
                   priority
                 />
               </Link>
