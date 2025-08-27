@@ -91,10 +91,10 @@ export function normalizeSeo(input: {
   ].filter(Boolean) as string[];
   const robots = robotsArr.length > 0 ? robotsArr.join(', ') : undefined;
 
-  const rawOg = seo?.opengraphImage?.sourceUrl ?? undefined;
-  const ogImage = absoluteUrl(rawOg, siteUrl);
-  const rawTw = seo?.twitterImage?.sourceUrl ?? rawOg;
-  const twImage = absoluteUrl(rawTw, siteUrl);
+  const ogSource = seo?.opengraphImage?.sourceUrl;
+  const twSource = seo?.twitterImage?.sourceUrl ?? ogSource;
+  const ogImage = absoluteUrl(ogSource || undefined, siteUrl);
+  const twImage = absoluteUrl(twSource || undefined, siteUrl);
   const ogUrl = absoluteUrl(seo?.opengraphUrl ?? canonical, siteUrl);
 
   // mapare sigură pentru tipul OG

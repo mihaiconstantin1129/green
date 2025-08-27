@@ -11,7 +11,7 @@ export default async function AdsPage() {
     page?.seo?.metaDesc ??
     page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
     'Publicitate'
-  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl || undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',

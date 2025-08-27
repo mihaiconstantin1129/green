@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import tagsFixture from './fixtures/tags.json'
 import authorsFixture from './fixtures/authors.json'
 import categoriesFixture from './fixtures/categories.json'
@@ -31,6 +33,63 @@ export interface Page {
 }
 
 const endpoint = process.env.WP_GRAPHQL_ENDPOINT
+
+async function cacheImage(url: string): Promise<string> {
+  try {
+    const parsed = new URL(url)
+    const filename = path.basename(parsed.pathname)
+    const imgDir = path.join(process.cwd(), 'public', 'img')
+    await fs.promises.mkdir(imgDir, { recursive: true })
+    const filePath = path.join(imgDir, filename)
+    if (!fs.existsSync(filePath)) {
+      const res = await fetch(url)
+      if (res.ok) {
+        const buf = Buffer.from(await res.arrayBuffer())
+        await fs.promises.writeFile(filePath, buf)
+      }
+    }
+    return `/img/${filename}`
+  } catch {
+    return url
+  }
+}
+
+export async function rewriteCmsHost(
+  input: string | null | undefined
+): Promise<string> {
+  if (!input) return ''
+  if (input.includes('<img')) {
+    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi
+    const matches = Array.from(input.matchAll(imgRegex))
+    let html = input
+    for (const m of matches) {
+      const src = m[1]
+      const local = await cacheImage(src)
+      html = html.replace(src, local)
+    }
+    return html
+  }
+  return cacheImage(input)
+}
+
+async function rewriteSeo(seo: WPSeo | null | undefined): Promise<WPSeo | undefined> {
+  if (!seo) return undefined
+  return {
+    ...seo,
+    opengraphImage: seo.opengraphImage
+      ? {
+          ...seo.opengraphImage,
+          sourceUrl: await rewriteCmsHost(seo.opengraphImage.sourceUrl ?? ''),
+        }
+      : null,
+    twitterImage: seo.twitterImage
+      ? {
+          ...seo.twitterImage,
+          sourceUrl: await rewriteCmsHost(seo.twitterImage.sourceUrl ?? ''),
+        }
+      : null,
+  }
+}
 
 const SEO_FIELDS = `
   title
@@ -81,14 +140,14 @@ async function fetchGraphQL<T>(query: string, variables: any): Promise<T> {
   return json.data
 }
 
-function mapPost(node: any): Post {
+async function mapPost(node: any): Promise<Post> {
   return {
     slug: node.slug,
     uri: node.uri ?? '',
     title: node.title,
     excerpt: node.excerpt,
-    content: node.content,
-    image: node.featuredImage?.node?.sourceUrl ?? '',
+    content: await rewriteCmsHost(node.content ?? ''),
+    image: await rewriteCmsHost(node.featuredImage?.node?.sourceUrl ?? ''),
     date: node.date ?? '',
     modified: node.modified ?? '',
     categories:
@@ -98,7 +157,7 @@ function mapPost(node: any): Post {
       slug: node.author?.node?.slug ?? '',
       name: node.author?.node?.name ?? '',
     },
-    seo: node.seo ?? undefined,
+    seo: await rewriteSeo(node.seo),
   }
 }
 
@@ -122,7 +181,8 @@ export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perP
     const data = await fetchGraphQL<any>(query, variables)
     const start = (page - 1) * perPage
     const end = start + perPage
-    return data.posts.nodes.slice(start, end).map(mapPost) as Post[]
+    const nodes = data.posts.nodes.slice(start, end)
+    return Promise.all(nodes.map(mapPost))
   } catch (e) {
     console.error(e)
     const start = (page - 1) * perPage
@@ -136,7 +196,7 @@ export async function getFeaturedPost(): Promise<Post | undefined> {
     const query = `${SEO_POST_FRAGMENT}\nquery Featured{\n    posts(first:1){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}} ...SeoFieldsOnPost}}\n  }`
     const data = await fetchGraphQL<any>(query, {})
     const node = data?.posts?.nodes?.[0]
-    return node ? mapPost(node) : undefined
+    return node ? await mapPost(node) : undefined
   } catch (e) {
     console.error(e)
     return fixtures.posts[0]
@@ -147,7 +207,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
   try {
     const query = `${SEO_POST_FRAGMENT}\nquery PostBySlug($slug: ID!){\n    post(id:$slug, idType:SLUG){\n      slug uri title excerpt content date modified\n      categories{nodes{slug name}}\n      tags{nodes{slug name}}\n      author{node{slug name}}\n      featuredImage{node{sourceUrl altText mediaDetails{width height}}}\n      ...SeoFieldsOnPost\n    }\n  }`
     const data = await fetchGraphQL<any>(query, { slug })
-    return data?.post ? mapPost(data.post) : undefined
+    return data?.post ? await mapPost(data.post) : undefined
   } catch (e) {
     console.error(e)
     return fixtures.posts.find((p) => p.slug === slug)
@@ -164,8 +224,8 @@ export async function getPageBySlug(slug: string): Promise<Page | undefined> {
           slug: node.slug,
           uri: node.uri ?? '',
           title: node.title,
-          content: node.content ?? '',
-          seo: node.seo ?? undefined,
+          content: await rewriteCmsHost(node.content ?? ''),
+          seo: await rewriteSeo(node.seo),
         }
       : undefined
   } catch (e) {
@@ -187,10 +247,14 @@ export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }
             slug: data.category.slug,
             name: data.category.name,
             uri: data.category.uri ?? '',
-            seo: data.category.seo ?? undefined,
+            seo: await rewriteSeo(data.category.seo),
           }
         : undefined,
-      posts: data.category ? data.category.posts.nodes.slice(start, end).map(mapPost) : [],
+      posts: data.category
+        ? await Promise.all(
+            data.category.posts.nodes.slice(start, end).map(mapPost)
+          )
+        : [],
     }
   } catch (e) {
     console.error(e)
@@ -218,10 +282,14 @@ export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { p
             slug: data.tag.slug,
             name: data.tag.name,
             uri: data.tag.uri ?? '',
-            seo: data.tag.seo ?? undefined,
+            seo: await rewriteSeo(data.tag.seo),
           }
         : undefined,
-      posts: data.tag ? data.tag.posts.nodes.slice(start, end).map(mapPost) : [],
+      posts: data.tag
+        ? await Promise.all(
+            data.tag.posts.nodes.slice(start, end).map(mapPost)
+          )
+        : [],
     }
   } catch (e) {
     console.error(e)
@@ -245,9 +313,17 @@ export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: 
     const end = start + perPage
     return {
       author: data.user
-        ? { slug: data.user.slug, name: data.user.name, seo: data.user.seo ?? undefined }
+        ? {
+            slug: data.user.slug,
+            name: data.user.name,
+            seo: await rewriteSeo(data.user.seo),
+          }
         : undefined,
-      posts: data.user ? data.user.posts.nodes.slice(start, end).map(mapPost) : [],
+      posts: data.user
+        ? await Promise.all(
+            data.user.posts.nodes.slice(start, end).map(mapPost)
+          )
+        : [],
     }
   } catch (e) {
     console.error(e)
@@ -269,7 +345,8 @@ export async function searchPosts(term: string, { page = 1, perPage = 10 }: { pa
     const data = await fetchGraphQL<any>(query, variables)
     const start = (page - 1) * perPage
     const end = start + perPage
-    return data.posts.nodes.slice(start, end).map(mapPost) as Post[]
+    const nodes = data.posts.nodes.slice(start, end)
+    return Promise.all(nodes.map(mapPost))
   } catch (e) {
     console.error(e)
     const start = (page - 1) * perPage
