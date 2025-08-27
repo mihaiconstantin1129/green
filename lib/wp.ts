@@ -1,5 +1,3 @@
-import postsFixture from './fixtures/posts.json'
-import categoriesFixture from './fixtures/categories.json'
 import tagsFixture from './fixtures/tags.json'
 import authorsFixture from './fixtures/authors.json'
 
@@ -52,6 +50,18 @@ function mapPost(node: any): Post {
   }
 }
 
+export async function getCategories(): Promise<Term[]> {
+  const query = `query Categories{\n    categories(first: 100){nodes{slug name}}\n  }`
+  try {
+    const data = await fetchGraphQL<any>(query, {})
+    return data.categories.nodes.map(
+      (c: any) => ({ slug: c.slug, name: c.name })
+    ) as Term[]
+  } catch {
+    return []
+  }
+}
+
 export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
   const query = `query Posts($offset: Int!, $size: Int!){\n    posts(where:{offsetPagination:{offset:$offset, size:$size}}){\n      nodes{\n        slug title excerpt content date modified\n        categories{nodes{slug name}}\n        tags{nodes{slug name}}\n        author{node{slug name}}\n        featuredImage{node{sourceUrl}}\n      }\n    }\n  }`
   const variables = { offset: (page - 1) * perPage, size: perPage }
@@ -59,7 +69,7 @@ export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perP
     const data = await fetchGraphQL<any>(query, variables)
     return data.posts.nodes.map(mapPost) as Post[]
   } catch {
-    return postsFixture.slice((page - 1) * perPage, page * perPage) as Post[]
+    return []
   }
 }
 
@@ -70,7 +80,7 @@ export async function getFeaturedPost(): Promise<Post | undefined> {
     const node = data.posts.nodes[0]
     return node ? mapPost(node) : undefined
   } catch {
-    return postsFixture[0] as Post | undefined
+    return undefined
   }
 }
 
@@ -80,7 +90,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
     const data = await fetchGraphQL<any>(query, { slug })
     return data.post ? mapPost(data.post) : undefined
   } catch {
-    return (postsFixture as Post[]).find((p) => p.slug === slug)
+    return undefined
   }
 }
 
@@ -94,12 +104,7 @@ export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }
       posts: data.category ? data.category.posts.nodes.map(mapPost) : [],
     }
   } catch {
-    const category = (categoriesFixture as Term[]).find((c) => c.slug === slug)
-    const posts = (postsFixture as Post[]).filter((p) => p.categories.some((c) => c.slug === slug))
-    return {
-      category,
-      posts: posts.slice((page - 1) * perPage, page * perPage),
-    }
+    return { category: undefined, posts: [] }
   }
 }
 
@@ -113,12 +118,7 @@ export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { p
       posts: data.tag ? data.tag.posts.nodes.map(mapPost) : [],
     }
   } catch {
-    const tag = (tagsFixture as Term[]).find((t) => t.slug === slug)
-    const posts = (postsFixture as Post[]).filter((p) => p.tags.some((t) => t.slug === slug))
-    return {
-      tag,
-      posts: posts.slice((page - 1) * perPage, page * perPage),
-    }
+    return { tag: undefined, posts: [] }
   }
 }
 
@@ -132,12 +132,7 @@ export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: 
       posts: data.user ? data.user.posts.nodes.map(mapPost) : [],
     }
   } catch {
-    const author = (authorsFixture as Author[]).find((a) => a.slug === slug)
-    const posts = (postsFixture as Post[]).filter((p) => p.author.slug === slug)
-    return {
-      author,
-      posts: posts.slice((page - 1) * perPage, page * perPage),
-    }
+    return { author: undefined, posts: [] }
   }
 }
 
@@ -148,16 +143,11 @@ export async function searchPosts(term: string, { page = 1, perPage = 10 }: { pa
     const data = await fetchGraphQL<any>(query, variables)
     return data.posts.nodes.map(mapPost) as Post[]
   } catch {
-    const results = (postsFixture as Post[]).filter((p) =>
-      p.title.toLowerCase().includes(term.toLowerCase())
-    )
-    return results.slice((page - 1) * perPage, page * perPage)
+    return []
   }
 }
 
 export const fixtures = {
-  posts: postsFixture as Post[],
-  categories: categoriesFixture as Term[],
   tags: tagsFixture as Term[],
   authors: authorsFixture as Author[],
 }

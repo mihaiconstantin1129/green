@@ -1,6 +1,7 @@
 import './globals.css'
 import Link from 'next/link'
 import { ReactNode } from 'react'
+import { getCategories } from '@/lib/wp'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
 import AdsenseSlot from '@/components/AdsenseSlot'
@@ -33,7 +34,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const categories = await getCategories()
   return (
     <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
       <head>
@@ -61,21 +63,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Green News România
             </Link>
             <nav className="hidden flex-1 justify-center gap-6 text-sm md:flex">
-              <Link href="/categorie/mediu" className="hover:text-accent">
-                Mediu
-              </Link>
-              <Link href="/categorie/energie-verde" className="hover:text-accent">
-                Energie Verde
-              </Link>
-              <Link href="/categorie/inovatie" className="hover:text-accent">
-                Inovație
-              </Link>
-              <Link href="/categorie/politici-economie" className="hover:text-accent">
-                Politici & Economie
-              </Link>
-              <Link href="/categorie/lifestyle-sustenabil" className="hover:text-accent">
-                Lifestyle Sustenabil
-              </Link>
+              {categories.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/categorie/${c.slug}`}
+                  className="hover:text-accent"
+                >
+                  {c.name}
+                </Link>
+              ))}
             </nav>
             <Button variant="ghost" size="icon" asChild>
               <Link href="/cautare" aria-label="Căutare">
@@ -98,46 +94,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div>
               <h3 className="mb-2 font-serif font-semibold">Link-uri rapide</h3>
               <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/categorie/mediu"
-                    className="hover:text-accent"
-                  >
-                    Mediu
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/categorie/energie-verde"
-                    className="hover:text-accent"
-                  >
-                    Energie Verde
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/categorie/inovatie"
-                    className="hover:text-accent"
-                  >
-                    Inovație
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/categorie/politici-economie"
-                    className="hover:text-accent"
-                  >
-                    Politici & Economie
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/categorie/lifestyle-sustenabil"
-                    className="hover:text-accent"
-                  >
-                    Lifestyle Sustenabil
-                  </Link>
-                </li>
+                {categories.map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      href={`/categorie/${c.slug}`}
+                      className="hover:text-accent"
+                    >
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
                 <li>
                   <Link href="/contact" className="hover:text-accent">
                     Contact
