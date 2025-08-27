@@ -1,10 +1,17 @@
 import ProseContent from '@/components/ProseContent'
+import SeoHead from '@/components/SeoHead'
 import { getPageBySlug } from '@/lib/wp'
 import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export default async function AboutPage() {
   const page = await getPageBySlug('despre').catch(() => undefined)
+  const title = page?.seo?.title ?? page?.title ?? 'Despre noi'
+  const description =
+    page?.seo?.metaDesc ??
+    page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
+    'Despre noi'
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',
@@ -15,10 +22,11 @@ export default async function AboutPage() {
     }
   return (
     <>
+      <SeoHead title={title} description={description} ogImage={ogImage} />
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) ?? '' }}
         />
       )}
       <div className="max-w-3xl mx-auto">
