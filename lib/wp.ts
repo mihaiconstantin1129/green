@@ -32,6 +32,8 @@ export interface Page {
 
 const endpoint = process.env.WP_GRAPHQL_ENDPOINT
 
+const SEO_FRAGMENT = `fragment SeoFragment on SEO {\n  title\n  metaDesc\n  canonical\n  metaRobotsNoindex\n  metaRobotsNofollow\n  opengraphTitle\n  opengraphDescription\n  opengraphUrl\n  opengraphSiteName\n  opengraphType\n  opengraphImage{sourceUrl altText mediaDetails{width height}}\n  twitterTitle\n  twitterDescription\n  twitterImage{sourceUrl}\n  breadcrumbs{text url}\n  schema{raw}\n}`
+
 async function fetchGraphQL<T>(query: string, variables: any): Promise<T> {
   if (!endpoint) throw new Error('Endpoint missing')
   const res = await fetch(endpoint, {
@@ -104,7 +106,7 @@ export async function getPosts({ page = 1, perPage = 10 }: { page?: number; perP
 
 export async function getFeaturedPost(): Promise<Post | undefined> {
   try {
-    const query = `query Featured{\n    posts(first:1){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}} seo{title metaDesc canonical opengraphType opengraphTitle opengraphDescription opengraphImage{sourceUrl altText mediaDetails{width height}} twitterTitle twitterDescription twitterImage{sourceUrl} breadcrumbs{text url} schema{raw}}}}\n  }`
+    const query = `${SEO_FRAGMENT}\nquery Featured{\n    posts(first:1){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}} seo{...SeoFragment}}}\n  }`
     const data = await fetchGraphQL<any>(query, {})
     const node = data?.posts?.nodes?.[0]
     return node ? mapPost(node) : undefined
@@ -116,7 +118,7 @@ export async function getFeaturedPost(): Promise<Post | undefined> {
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
   try {
-    const query = `query PostBySlug($slug: ID!){\n    post(id:$slug, idType:SLUG){\n      slug uri title excerpt content date modified\n      categories{nodes{slug name}}\n      tags{nodes{slug name}}\n      author{node{slug name}}\n      featuredImage{node{sourceUrl altText mediaDetails{width height}}}\n      seo{title metaDesc canonical opengraphType opengraphTitle opengraphDescription opengraphImage{sourceUrl altText mediaDetails{width height}} twitterTitle twitterDescription twitterImage{sourceUrl} breadcrumbs{text url} schema{raw}}\n    }\n  }`
+    const query = `${SEO_FRAGMENT}\nquery PostBySlug($slug: ID!){\n    post(id:$slug, idType:SLUG){\n      slug uri title excerpt content date modified\n      categories{nodes{slug name}}\n      tags{nodes{slug name}}\n      author{node{slug name}}\n      featuredImage{node{sourceUrl altText mediaDetails{width height}}}\n      seo{...SeoFragment}\n    }\n  }`
     const data = await fetchGraphQL<any>(query, { slug })
     return data?.post ? mapPost(data.post) : undefined
   } catch (e) {
@@ -127,7 +129,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
 
 export async function getPageBySlug(slug: string): Promise<Page | undefined> {
   try {
-    const query = `query PageBySlug($slug: ID!){\n    page(id:$slug, idType:URI){\n      slug uri title content\n      seo{title metaDesc canonical opengraphType opengraphTitle opengraphDescription opengraphImage{sourceUrl} twitterTitle twitterDescription twitterImage{sourceUrl} breadcrumbs{text url} schema{raw}}\n    }\n  }`
+    const query = `${SEO_FRAGMENT}\nquery PageBySlug($slug: ID!){\n    page(id:$slug, idType:URI){\n      slug uri title content\n      seo{...SeoFragment}\n    }\n  }`
     const data = await fetchGraphQL<any>(query, { slug })
     const node = data?.page
     return node
@@ -147,7 +149,7 @@ export async function getPageBySlug(slug: string): Promise<Page | undefined> {
 
 export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
   try {
-    const query = `query Category($slug: ID!, $first: Int!){\n    category(id:$slug, idType:SLUG){\n      slug name uri\n      seo{title metaDesc canonical opengraphType opengraphTitle opengraphDescription opengraphImage{sourceUrl} twitterTitle twitterDescription twitterImage{sourceUrl} breadcrumbs{text url} schema{raw}}\n      posts(first:$first){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}}}}\n    }\n  }`
+    const query = `${SEO_FRAGMENT}\nquery Category($slug: ID!, $first: Int!){\n    category(id:$slug, idType:SLUG){\n      slug name uri\n      seo{...SeoFragment}\n      posts(first:$first){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}}}}\n    }\n  }`
     const variables = { slug, first: perPage * page }
     const data = await fetchGraphQL<any>(query, variables)
     const start = (page - 1) * perPage
@@ -178,7 +180,7 @@ export async function getCategoryBySlug(slug: string, { page = 1, perPage = 10 }
 
 export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
   try {
-    const query = `query Tag($slug: ID!, $first: Int!){\n    tag(id:$slug, idType:SLUG){\n      slug name uri\n      seo{title metaDesc canonical opengraphType opengraphTitle opengraphDescription opengraphImage{sourceUrl} twitterTitle twitterDescription twitterImage{sourceUrl} breadcrumbs{text url} schema{raw}}\n      posts(first:$first){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}}}}\n    }\n  }`
+    const query = `${SEO_FRAGMENT}\nquery Tag($slug: ID!, $first: Int!){\n    tag(id:$slug, idType:SLUG){\n      slug name uri\n      seo{...SeoFragment}\n      posts(first:$first){nodes{slug uri title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} author{node{slug name}} featuredImage{node{sourceUrl altText mediaDetails{width height}}}}}\n    }\n  }`
     const variables = { slug, first: perPage * page }
     const data = await fetchGraphQL<any>(query, variables)
     const start = (page - 1) * perPage
@@ -209,13 +211,15 @@ export async function getTagBySlug(slug: string, { page = 1, perPage = 10 }: { p
 
 export async function getAuthorBySlug(slug: string, { page = 1, perPage = 10 }: { page?: number; perPage?: number }) {
   try {
-    const query = `query Author($slug: ID!, $first: Int!){\n    user(id:$slug, idType:SLUG){\n      slug name\n      posts(first:$first){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} featuredImage{node{sourceUrl}} author{node{slug name}}}}\n    }\n  }`
+    const query = `${SEO_FRAGMENT}\nquery Author($slug: ID!, $first: Int!){\n    user(id:$slug, idType:SLUG){\n      slug name\n      seo{...SeoFragment}\n      posts(first:$first){nodes{slug title excerpt content date modified categories{nodes{slug name}} tags{nodes{slug name}} featuredImage{node{sourceUrl}} author{node{slug name}}}}\n    }\n  }`
     const variables = { slug, first: perPage * page }
     const data = await fetchGraphQL<any>(query, variables)
     const start = (page - 1) * perPage
     const end = start + perPage
     return {
-      author: data.user ? { slug: data.user.slug, name: data.user.name } : undefined,
+      author: data.user
+        ? { slug: data.user.slug, name: data.user.name, seo: data.user.seo ?? undefined }
+        : undefined,
       posts: data.user ? data.user.posts.nodes.slice(start, end).map(mapPost) : [],
     }
   } catch (e) {

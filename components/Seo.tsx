@@ -1,14 +1,25 @@
-"use client";
-import { useEffect } from 'react';
-import { useSeo } from './SeoProvider';
-import { normalizeSeo } from '@/lib/seo';
+import { jsonLdScript, normalizeSeo, seoToMetadata } from '@/lib/seo';
 
-type SeoData = ReturnType<typeof normalizeSeo>;
+type Props = {
+  jsonLd?: object | string | null;
+  prev?: string;
+  next?: string;
+};
 
-export default function Seo({ data }: { data: SeoData }) {
-  const { setData } = useSeo();
-  useEffect(() => {
-    setData(data);
-  }, [data, setData]);
-  return null;
+export default function Seo({ jsonLd, prev, next }: Props) {
+  const script = jsonLdScript(jsonLd ?? undefined);
+  return (
+    <>
+      {prev && <link rel="prev" href={prev} />}
+      {next && <link rel="next" href={next} />}
+      {script && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: script }}
+        />
+      )}
+    </>
+  );
 }
+
+export { normalizeSeo, seoToMetadata };
