@@ -1,8 +1,7 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getAuthorBySlug, fixtures, type Post } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export function generateStaticParams() {
@@ -18,14 +17,6 @@ export default async function AuthorPage({ params }: Props) {
   try {
     const { author, posts } = await getAuthorBySlug(params.slug, { page, perPage: 10 })
     if (!author) return <div>Autor necunoscut.</div>
-    const seoData = normalizeSeo({
-      seo: (author as any).seo,
-      wpTitle: author.name,
-      wpExcerpt: `Articole scrise de ${author.name}`,
-      url: `/autor/${author.slug}`,
-      siteName: 'Green News România',
-      siteUrl,
-    })
     const jsonLd =
       (author as any).seo?.schema?.raw ?? {
         '@context': 'https://schema.org',
@@ -36,7 +27,12 @@ export default async function AuthorPage({ params }: Props) {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div>
           <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Autor: ${author.name}` }]} />
           <h1 className="text-3xl font-bold mb-6">Autor: {author.name}</h1>
@@ -56,4 +52,18 @@ export default async function AuthorPage({ params }: Props) {
       <p className="text-red-500">Eroare la încărcarea autorului.</p>
     )
   }
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { author } = await getAuthorBySlug(params.slug, { page: 1, perPage: 1 })
+  if (!author) return {}
+  const seoData = normalizeSeo({
+    seo: (author as any).seo,
+    wpTitle: author.name,
+    wpExcerpt: `Articole scrise de ${author.name}`,
+    url: `/autor/${author.slug}`,
+    siteName: 'Green News România',
+    siteUrl,
+  })
+  return seoToMetadata(seoData)
 }

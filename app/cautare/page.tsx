@@ -1,7 +1,6 @@
 import ArticleCard from '@/components/ArticleCard'
 import { searchPosts } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
-import { normalizeSeo } from '@/lib/seo'
+import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
 export default async function SearchPage() {
@@ -9,13 +8,6 @@ export default async function SearchPage() {
   const page = 1
   try {
     const results = term ? await searchPosts(term, { page, perPage: 10 }) : []
-    const seoData = normalizeSeo({
-      wpTitle: 'Căutare',
-      wpExcerpt: 'Caută articole',
-      url: '/cautare',
-      siteName: 'Green News România',
-      siteUrl,
-    })
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
@@ -25,7 +17,12 @@ export default async function SearchPage() {
 
     return (
       <>
-        <SeoHead seo={seoData} jsonLd={jsonLd} />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+          />
+        )}
         <div>
           <h1 className="text-3xl font-bold mb-4">Căutare</h1>
           <form className="mb-4">
@@ -55,3 +52,13 @@ export default async function SearchPage() {
     )
   }
 }
+
+export const metadata = seoToMetadata(
+  normalizeSeo({
+    wpTitle: 'Căutare',
+    wpExcerpt: 'Caută articole',
+    url: '/cautare',
+    siteName: 'Green News România',
+    siteUrl,
+  })
+)
