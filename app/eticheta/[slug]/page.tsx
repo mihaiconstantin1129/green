@@ -1,7 +1,7 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getTagBySlug, fixtures, type Post } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
+import Seo from '@/components/Seo'
 import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
@@ -29,7 +29,7 @@ export default async function TagPage({ params }: Props) {
 
     return (
       <>
-        <SeoHead data={seoData} />
+        <Seo data={seoData} />
         <div>
         <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: `Etichetă: ${tag.name}` }]} />
         <h1 className="text-3xl font-bold mb-6">Etichetă: {tag.name}</h1>
