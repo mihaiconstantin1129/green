@@ -1,6 +1,6 @@
 import ProseContent from '@/components/ProseContent'
 import SeoHead from '@/components/SeoHead'
-import { getPageBySlug, rewriteCmsHost } from '@/lib/wp'
+import { getPageBySlug } from '@/lib/wp'
 import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
@@ -11,8 +11,7 @@ export default async function AdsPage() {
     page?.seo?.metaDesc ??
     page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
     'Publicitate'
-  const ogImage =
-    rewriteCmsHost(page?.seo?.opengraphImage?.sourceUrl) || undefined
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',
