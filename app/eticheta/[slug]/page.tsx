@@ -8,11 +8,10 @@ export function generateStaticParams() {
 
 interface Props {
   params: { slug: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
-export default async function TagPage({ params, searchParams }: Props) {
-  const page = parseInt((searchParams?.pagina as string) || '1')
+export default async function TagPage({ params }: Props) {
+  const page = 1
   try {
     const { tag, posts } = await getTagBySlug(params.slug, { page, perPage: 10 })
     if (!tag) return <div>Eticheta nu există.</div>

@@ -1,13 +1,9 @@
 import ArticleCard from '@/components/ArticleCard'
 import { searchPosts } from '@/lib/wp'
 
-interface Props {
-  searchParams?: { [key: string]: string | string[] | undefined }
-}
-
-export default async function SearchPage({ searchParams }: Props) {
-  const term = (searchParams?.q as string) || ''
-  const page = parseInt((searchParams?.pagina as string) || '1')
+export default async function SearchPage() {
+  const term = ''
+  const page = 1
   try {
     const results = term ? await searchPosts(term, { page, perPage: 10 }) : []
 

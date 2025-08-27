@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "test-2",
+    "title": "Test Article",
+    "excerpt": "This is a test article.",
+    "content": "<p>Content of test article.</p>",
+    "image": "",
+    "date": "2023-01-01",
+    "modified": "2023-01-01",
+    "categories": [{ "slug": "energie-verde", "name": "Energie Verde" }],
+    "tags": [{ "slug": "tech", "name": "Tech" }],
+    "author": { "slug": "ion-pop", "name": "Ion Pop" }
+  }
+]
