@@ -1,7 +1,8 @@
 import React from 'react'
 import AdsenseSlot from './AdsenseSlot'
 
-export default function ProseContent({ html }: { html: string }) {
+export default function ProseContent({ html }: { html?: string | null }) {
+  if (!html) return null
   const parts = html.split(/<\/p>/i)
   const content: React.ReactNode[] = []
 
