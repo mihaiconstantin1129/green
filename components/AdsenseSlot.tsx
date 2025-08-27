@@ -10,7 +10,7 @@ export default function AdsenseSlot({ className }: Props) {
   if (!client) {
     return (
       <div className="bg-gray-100 text-center text-sm text-gray-600 p-4 my-4">
-        Spațiu publicitar – Google AdSense
+        Spațiu publicitar
       </div>
     )
   }

@@ -26,12 +26,13 @@ export default async function TagPage({ params }: Props) {
         url: `${siteUrl}/eticheta/${tag.slug}`,
       }
 
+    const jsonLdStr = jsonLdScript(jsonLd);
     return (
       <>
-        {jsonLd && (
+        {jsonLdStr && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdStr }}
           />
         )}
         <div>

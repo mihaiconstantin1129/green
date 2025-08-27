@@ -21,6 +21,38 @@ export type WPSeo = {
   breadcrumbs?: { text: string; url: string }[] | null;
   schema?: { raw?: string | null } | null;
 };
+type TwitterCard = 'summary_large_image' | 'summary' | 'player' | 'app';
+
+type OpenGraphType =
+  | 'website' | 'article' | 'book' | 'profile'
+  | 'music.song' | 'music.album' | 'music.playlist' | 'music.radio_station'
+  | 'video.movie' | 'video.episode' | 'video.tv_show' | 'video.other';
+
+type NormalizedSeo = {
+  title: string;
+  description: string;
+  canonical?: string;
+  robots?: string;
+  og: {
+    title: string;
+    description: string;
+    type: OpenGraphType;
+    url?: string;
+    siteName?: string;
+    image?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+    imageAlt?: string;
+  };
+  twitter: {
+    card: TwitterCard;
+    title: string;
+    description: string;
+    image?: string;
+  };
+  schema: string | null;
+  breadcrumbs: { text: string; url: string }[];
+};
 
 function absoluteUrl(raw?: string | null, siteUrl?: string) {
   if (!raw) return undefined;
@@ -41,18 +73,19 @@ export function normalizeSeo(input: {
   url?: string;
   siteName?: string;
   siteUrl?: string;
-}) {
+}): NormalizedSeo {
   const { seo, wpTitle, wpExcerpt, url, siteName, siteUrl } = input;
   const title = seo?.title ?? wpTitle ?? siteName ?? '';
   const description = (seo?.metaDesc ?? wpExcerpt ?? '')
     .replace(/<[^>]*>?/gm, '')
     .slice(0, 160);
+
   const canonical = absoluteUrl(seo?.canonical ?? url, siteUrl);
 
   const robotsArr = [
     seo?.metaRobotsNoindex === 'noindex' ? 'noindex' : null,
     seo?.metaRobotsNofollow === 'nofollow' ? 'nofollow' : null,
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
   const robots = robotsArr.length > 0 ? robotsArr.join(', ') : undefined;
 
   const rawOg = seo?.opengraphImage?.sourceUrl ?? undefined;
@@ -60,6 +93,10 @@ export function normalizeSeo(input: {
   const rawTw = seo?.twitterImage?.sourceUrl ?? rawOg;
   const twImage = absoluteUrl(rawTw, siteUrl);
   const ogUrl = absoluteUrl(seo?.opengraphUrl ?? canonical, siteUrl);
+
+  // mapare sigură pentru tipul OG
+  const ogType: OpenGraphType =
+    (seo?.opengraphType as OpenGraphType) ?? 'article';
 
   const breadcrumbs = (seo?.breadcrumbs ?? []).map((b) => ({
     text: b.text,
@@ -74,7 +111,7 @@ export function normalizeSeo(input: {
     og: {
       title: seo?.opengraphTitle ?? title,
       description: seo?.opengraphDescription ?? description,
-      type: seo?.opengraphType ?? 'article',
+      type: ogType,
       url: ogUrl ?? canonical,
       siteName: seo?.opengraphSiteName ?? siteName,
       image: ogImage,
@@ -83,7 +120,7 @@ export function normalizeSeo(input: {
       imageAlt: seo?.opengraphImage?.altText ?? undefined,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary_large_image', // 👈 literal, nu string generic
       title: seo?.twitterTitle ?? title,
       description: seo?.twitterDescription ?? description,
       image: twImage,
@@ -92,6 +129,7 @@ export function normalizeSeo(input: {
     breadcrumbs,
   };
 }
+
 
 import type { Metadata } from 'next';
 

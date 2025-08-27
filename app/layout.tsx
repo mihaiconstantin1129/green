@@ -57,7 +57,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body className="flex min-h-screen flex-col bg-white text-black">
           <header className="sticky top-0 z-50 border-b bg-white">
-            <AdsenseSlot className="w-full min-h-[90px] border-b" />
             <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
               <Link
                 href="/"

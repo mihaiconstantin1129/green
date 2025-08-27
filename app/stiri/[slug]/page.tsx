@@ -70,12 +70,14 @@ export default async function ArticlePage({ params }: Props) {
         mainEntityOfPage: seoData.canonical,
       }
 
+      const jsonLdStr = jsonLdScript(jsonLd);
+
     return (
       <>
-        {jsonLd && (
+         {jsonLdStr && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdStr }}
           />
         )}
         <div className="mx-auto max-w-7xl">

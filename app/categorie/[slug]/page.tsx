@@ -26,13 +26,13 @@ export default async function CategoryPage({ params }: Props) {
         description: `Știri din categoria ${category.name}`,
         url: `${siteUrl}/categorie/${category.slug}`,
       }
-
+    const jsonLdStr = jsonLdScript(jsonLd);
     return (
       <>
-        {jsonLd && (
+        {jsonLdStr && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdStr }}
           />
         )}
         <div>

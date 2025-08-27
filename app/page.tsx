@@ -28,13 +28,13 @@ export default async function HomePage() {
           'Portal de știri din România',
         url: `${siteUrl}/`,
       }
-
+     const jsonLdStr = jsonLdScript(jsonLd);
     return (
       <>
-        {jsonLd && (
+       {jsonLdStr && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdStr }}
           />
         )}
         <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
