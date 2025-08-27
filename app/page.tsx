@@ -3,7 +3,7 @@ import SidebarPopular from '@/components/SidebarPopular'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import FeaturedArticle from '@/components/FeaturedArticle'
 import { getPosts, getFeaturedPost, getPageBySlug } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
+import Seo from '@/components/Seo'
 import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
@@ -28,7 +28,7 @@ export default async function HomePage() {
     })
     return (
       <>
-        <SeoHead data={seoData} />
+        <Seo data={seoData} />
         <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
         <div className="space-y-8">
           {featured && <FeaturedArticle article={featured} />}

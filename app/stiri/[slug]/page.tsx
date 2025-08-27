@@ -6,7 +6,7 @@ import SidebarPopular from '@/components/SidebarPopular'
 import ArticleCard from '@/components/ArticleCard'
 import Image from 'next/image'
 import { getPostBySlug, getPosts } from '@/lib/wp'
-import SeoHead from '@/components/SeoHead'
+import Seo from '@/components/Seo'
 import { normalizeSeo } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
 
@@ -37,7 +37,7 @@ export default async function ArticlePage({ params }: Props) {
 
     return (
       <>
-        <SeoHead data={seoData} />
+        <Seo data={seoData} />
         <div className="mx-auto max-w-7xl">
           <Breadcrumb items={[{ label: 'Acasă', href: '/' }, { label: article.title }]} />
         <div className="lg:flex lg:gap-8">
