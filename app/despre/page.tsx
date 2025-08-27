@@ -11,7 +11,7 @@ export default async function AboutPage() {
     page?.seo?.metaDesc ??
     page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
     'Despre noi'
-  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl || undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',

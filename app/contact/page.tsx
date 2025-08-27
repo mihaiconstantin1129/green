@@ -11,7 +11,7 @@ export default async function ContactPage() {
     page?.seo?.metaDesc ??
     page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
     'Contact'
-  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl || undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',

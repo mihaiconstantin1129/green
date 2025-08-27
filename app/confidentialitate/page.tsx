@@ -12,7 +12,7 @@ export default async function PrivacyPage() {
     page?.seo?.metaDesc ??
     page?.excerpt?.replace(/<[^>]*>?/gm, '') ??
     'Politica de confidențialitate'
-  const ogImage = page?.seo?.opengraphImage?.sourceUrl ?? undefined
+  const ogImage = page?.seo?.opengraphImage?.sourceUrl || undefined
   const jsonLd =
     page?.seo?.schema?.raw ?? {
       '@context': 'https://schema.org',
