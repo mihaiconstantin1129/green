@@ -19,7 +19,7 @@ export default function FeaturedArticle({ article }: { article: Post }) {
           {article.title}
         </Link>
       </h2>
-      <p className="text-gray-700">{article.excerpt}</p>
+      <p className="text-gray-700">{article.excerpt.replace(/<[^>]+>/g, '')}</p>
     </article>
   )
 }

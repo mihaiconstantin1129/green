@@ -23,7 +23,7 @@ export default function ArticleCard({ article }: { article: Post }) {
             {article.title}
           </Link>
         </h3>
-        <p className="text-sm text-gray-600">{article.excerpt}</p>
+        <p className="text-sm text-gray-600">{article.excerpt.replace(/<[^>]+>/g, '')}</p>
       </div>
     </article>
   )
