@@ -1,11 +1,12 @@
 import ArticleCard from '@/components/ArticleCard'
 import Breadcrumb from '@/components/Breadcrumb'
-import { getCategoryBySlug, fixtures, type Post } from '@/lib/wp'
+import { getCategoryBySlug, getCategories, type Post } from '@/lib/wp'
 import type { Metadata } from 'next'
 import { siteUrl } from '@/lib/utils'
 
-export function generateStaticParams() {
-  return fixtures.categories.map((c) => ({ slug: c.slug }))
+export async function generateStaticParams() {
+  const categories = await getCategories()
+  return categories.map((c) => ({ slug: c.slug }))
 }
 
 interface Props {
