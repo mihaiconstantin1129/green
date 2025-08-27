@@ -1,5 +1,6 @@
 import './globals.css'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ReactNode } from 'react'
 import { getCategories } from '@/lib/wp'
 import { siteUrl } from '@/lib/utils'
@@ -50,7 +51,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               '@type': 'Organization',
               name: 'Green News România',
               url: siteUrl,
-              logo: `${siteUrl}/logo.png`,
+              logo: `${siteUrl}/logo.webp`,
             }),
           }}
         />
@@ -58,11 +59,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="flex min-h-screen flex-col bg-white text-black">
           <header className="sticky top-0 z-50 border-b bg-white">
             <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
-              <Link
-                href="/"
-                className="text-3xl font-serif font-bold text-accent"
-              >
-                Green News România
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/logo.webp"
+                  alt="Green News România"
+                  width={120}
+                  height={65}
+                  className="h-8 w-auto"
+                  priority
+                />
               </Link>
               <nav className="hidden flex-1 justify-center gap-6 text-sm md:flex">
                 {catError ? (

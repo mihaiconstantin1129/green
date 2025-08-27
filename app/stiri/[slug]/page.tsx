@@ -64,7 +64,7 @@ export default async function ArticlePage({ params }: Props) {
           name: 'Green News România',
           logo: {
             '@type': 'ImageObject',
-            url: `${siteUrl}/logo.png`,
+            url: `${siteUrl}/logo.webp`,
           },
         },
         mainEntityOfPage: seoData.canonical,
