@@ -35,7 +35,14 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const categories = await getCategories()
+  let categories: { slug: string; name: string }[] = []
+  let catError = false
+  try {
+    categories = await getCategories()
+  } catch (e) {
+    console.error(e)
+    catError = true
+  }
   return (
     <html lang="ro" className={`${inter.variable} ${playfair.variable}`}>
       <head>
@@ -63,15 +70,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               Green News România
             </Link>
             <nav className="hidden flex-1 justify-center gap-6 text-sm md:flex">
-              {categories.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/categorie/${c.slug}`}
-                  className="hover:text-accent"
-                >
-                  {c.name}
-                </Link>
-              ))}
+              {catError ? (
+                <span className="text-red-500">Eroare la categoriile</span>
+              ) : (
+                categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/categorie/${c.slug}`}
+                    className="hover:text-accent"
+                  >
+                    {c.name}
+                  </Link>
+                ))
+              )}
             </nav>
             <Button variant="ghost" size="icon" asChild>
               <Link href="/cautare" aria-label="Căutare">
@@ -94,16 +105,20 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div>
               <h3 className="mb-2 font-serif font-semibold">Link-uri rapide</h3>
               <ul className="space-y-2">
-                {categories.map((c) => (
-                  <li key={c.slug}>
-                    <Link
-                      href={`/categorie/${c.slug}`}
-                      className="hover:text-accent"
-                    >
-                      {c.name}
-                    </Link>
-                  </li>
-                ))}
+                {catError ? (
+                  <li className="text-red-500">Eroare la categoriile</li>
+                ) : (
+                  categories.map((c) => (
+                    <li key={c.slug}>
+                      <Link
+                        href={`/categorie/${c.slug}`}
+                        className="hover:text-accent"
+                      >
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))
+                )}
                 <li>
                   <Link href="/contact" className="hover:text-accent">
                     Contact
