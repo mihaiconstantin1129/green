@@ -1,5 +1,3 @@
-import { rewriteCmsHost } from './wp'
-
 export type WPSeo = {
   title?: string | null;
   metaDesc?: string | null;
@@ -93,11 +91,9 @@ export function normalizeSeo(input: {
   ].filter(Boolean) as string[];
   const robots = robotsArr.length > 0 ? robotsArr.join(', ') : undefined;
 
-  const ogSource = seo?.opengraphImage?.sourceUrl;
-  const twSource = seo?.twitterImage?.sourceUrl ?? ogSource;
-  const rawOg = rewriteCmsHost(ogSource) || undefined;
+  const rawOg = seo?.opengraphImage?.sourceUrl ?? undefined;
   const ogImage = absoluteUrl(rawOg, siteUrl);
-  const rawTw = rewriteCmsHost(twSource) || undefined;
+  const rawTw = seo?.twitterImage?.sourceUrl ?? rawOg;
   const twImage = absoluteUrl(rawTw, siteUrl);
   const ogUrl = absoluteUrl(seo?.opengraphUrl ?? canonical, siteUrl);
 

@@ -18,6 +18,11 @@ const nextConfig = {
         hostname: 'green-news.ro',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cms.green-news.ro',
+        pathname: '/**',
+      },
     ],
   },
 };
