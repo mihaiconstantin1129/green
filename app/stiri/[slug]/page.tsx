@@ -4,7 +4,7 @@ import ShareBar from '@/components/ShareBar'
 import AdsenseSlot from '@/components/AdsenseSlot'
 import SidebarPopular from '@/components/SidebarPopular'
 import ArticleCard from '@/components/ArticleCard'
-import Image from 'next/image'
+import ResponsiveImage from '@/components/ResponsiveImage'
 import { getPostBySlug, getPosts } from '@/lib/wp'
 import { normalizeSeo, seoToMetadata, jsonLdScript } from '@/lib/seo'
 import { siteUrl } from '@/lib/utils'
@@ -88,12 +88,14 @@ export default async function ArticlePage({ params }: Props) {
               {article.title}
             </h1>
             {article.image && (
-              <Image
+              <ResponsiveImage
                 src={article.image}
                 alt={article.title}
                 width={1200}
                 height={600}
                 className="mb-6 w-full rounded-xl object-cover"
+                widths={[480, 800, 1200]}
+                sizes="100vw"
               />
             )}
             <ProseContent html={article.content} />
